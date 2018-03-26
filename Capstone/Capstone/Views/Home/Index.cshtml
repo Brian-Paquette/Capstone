@@ -1,44 +1,50 @@
-﻿@{
-    //ViewBag.Title = "Home Page";
-}
-@section scripts {
-    <script type="text/javascript" src="~/Scripts/site/filemanager.js"></script>
-}
-<div class="container">
-    <div class="row">
-        <div class="absolute-center responsive-center">
-            <div class="logo-container">
-                <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> Exam Scheduletron
-            </div>
+﻿<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Sign-In with Microsoft Guide</title>
+</head>
+<body>
+    @if (!Request.IsAuthenticated)
+    {
+        <!-- If the user is not authenticated, display the sign-in button -->
+        <a href="@Url.Action("SignIn", "Home")" style="text-decoration: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="300px" height="50px" viewBox="0 0 3278 522" class="SignInButton">
+            <style type="text/css">
+                .fil0:hover {
+                    fill: #4B4B4B;
+                }
 
-                <div class="tool-panel panel shadowed">
-                    <div class="panel-body">
-                        @using (Html.BeginForm("ImportExcel", "ScheduleGenerator", FormMethod.Post, new { enctype = "multipart/form-data" }))
-                        {
-                            <label id="schedule-upload" class="tool-panel-btn btn btn-default btn-file">
-                                <span class="btn-label pull-left">Upload Course Excel (.xsl)</span><input type="file" name="excelFile" style="display: none;"><!-- accept=".xsl" -->
-                                <span class="glyphicon glyphicon-upload pull-right" aria-hidden="true"></span>
-                            </label>
-                            <label id="schedule-generate" class="tool-panel-btn btn btn-info btn-file" style="display:none;">
-                                Generate Exam Schedule <input type="submit" style="display: none;">
-                                <span class="glyphicon glyphicon-download pull-right" aria-hidden="true"></span>
-                            </label>
-                        }
-                        <span class="text-info text-center">@TempData["UploadSuccess"]</span>
-                        <span class="text-danger text-center">@TempData["UploadError"]</span>
-                        <hr />
-                        <label class="tool-panel-btn btn btn-default">
-                            Download Excel Template Test
-                            <span class="glyphicon glyphicon-th-list pull-right" aria-hidden="true"></span>
-                        </label>
-                        <hr />
-                        <label class="tool-panel-btn btn btn-default">
-                            Office 365 Tool
-                            <span class="glyphicon glyphicon-paperclip pull-right" aria-hidden="true"></span>
-                        </label>
-                    </div>
-                </div>
+                .fnt0 {
+                    font-size: 260px;
+                    font-family: 'Segoe UI Semibold', 'Segoe UI';
+                    text-decoration: none;
+                }
+</style>
+            <rect class="fil0" x="2" y="2" width="3174" height="517" fill="black" />
 
-        </div>
-    </div>
-</div>
+            <rect x="150" y="129" width="122" height="122" fill="#F35325" />
+
+            <rect x="284" y="129" width="122" height="122" fill="#81BC06" />
+
+            <rect x="150" y="263" width="122" height="122" fill="#05A6F0" />
+
+            <rect x="284" y="263" width="122" height="122" fill="#FFBA08" />
+
+            <text x="470" y="357" fill="white" class="fnt0">Sign in with Microsoft</text>
+        </svg>
+        </a>
+    }
+    else
+    {
+        <span><br />Hello @System.Security.Claims.ClaimsPrincipal.Current.FindFirst("name").Value;</span>
+        <br /><br />
+        @Html.ActionLink("See Your Claims", "Index", "Claims")
+        <br /><br />
+        @Html.ActionLink("Sign out", "SignOut", "Home")
+    }
+    @if (!string.IsNullOrWhiteSpace(Request.QueryString["errormessage"]))
+    {
+        <div style="background-color:red;color:white;font-weight: bold;">Error: @Request.QueryString["errormessage"]</div>
+    }
+</body>
+</html>
