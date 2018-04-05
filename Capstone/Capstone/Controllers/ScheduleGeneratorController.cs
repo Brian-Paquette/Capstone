@@ -51,9 +51,9 @@ namespace Capstone.Controllers
             // Connect to recently saved excel sheet
             OleDbConnection conn = null;
             if (excelFile.FileName.EndsWith(".xls"))
-                conn = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0; data source=" + path + "; Extended Properties=\"Excel 8.0;HDR=No;IMEX=1\";");
+                conn = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0; data source=" + path + ";Extended Properties=\"Excel 8.0;HDR=1;IMEX=1\";");
             if (excelFile.FileName.EndsWith(".xlsx"))
-                conn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties=\"Excel 12.0 Xml;HDR=No;IMEX=1\";");
+                conn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties=\"Excel 12.0 Xml;HDR=1;IMEX=1\";");
 
             conn.Open();
             DataTable data = conn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
