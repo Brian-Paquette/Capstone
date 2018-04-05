@@ -434,6 +434,8 @@ C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.Ex
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.Extensions.Options.ConfigurationExtensions.dll
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.Extensions.Options.dll
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.Extensions.Primitives.dll
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.Graph.Core.dll
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.Graph.dll
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.Identity.Client.dll
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.IdentityModel.Logging.dll
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.IdentityModel.Protocols.dll
@@ -518,6 +520,8 @@ C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.Ex
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.Extensions.Options.xml
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.Extensions.Options.ConfigurationExtensions.xml
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.Extensions.Primitives.xml
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.Graph.xml
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.Graph.Core.xml
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.IdentityModel.Logging.xml
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.IdentityModel.Protocols.xml
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.IdentityModel.Protocols.OpenIdConnect.xml
@@ -554,7 +558,6 @@ C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.AI
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.AI.ServerTelemetryChannel.xml
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.AI.WindowsServer.xml
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\Microsoft.AI.Web.xml
-C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\obj\Debug\Capstone.csprojResolveAssemblyReference.cache
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\obj\Debug\Capstone.csproj.CoreCompileInputs.cache
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\obj\Debug\Capstone.dll
 C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\obj\Debug\Capstone.pdb
