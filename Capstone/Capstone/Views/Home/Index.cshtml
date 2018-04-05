@@ -1,50 +1,62 @@
-﻿<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Sign-In with Microsoft Guide</title>
-</head>
-<body>
-    @if (!Request.IsAuthenticated)
-    {
-        <!-- If the user is not authenticated, display the sign-in button -->
-        <a href="@Url.Action("SignIn", "Home")" style="text-decoration: none;">
-            <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="300px" height="50px" viewBox="0 0 3278 522" class="SignInButton">
-            <style type="text/css">
-                .fil0:hover {
-                    fill: #4B4B4B;
-                }
-
-                .fnt0 {
-                    font-size: 260px;
-                    font-family: 'Segoe UI Semibold', 'Segoe UI';
-                    text-decoration: none;
-                }
-</style>
-            <rect class="fil0" x="2" y="2" width="3174" height="517" fill="black" />
-
-            <rect x="150" y="129" width="122" height="122" fill="#F35325" />
-
-            <rect x="284" y="129" width="122" height="122" fill="#81BC06" />
-
-            <rect x="150" y="263" width="122" height="122" fill="#05A6F0" />
-
-            <rect x="284" y="263" width="122" height="122" fill="#FFBA08" />
-
-            <text x="470" y="357" fill="white" class="fnt0">Sign in with Microsoft</text>
-        </svg>
-        </a>
-    }
-    else
-    {
-        <p>Welcome, @(ViewBag.UserName)!</p>
-        <br /><br />
-        @Html.ActionLink("See Your Claims", "Index", "Claims")
-        <br /><br />
-        @Html.ActionLink("Sign out", "SignOut", "Home")
-    }
-    @if (!string.IsNullOrWhiteSpace(Request.QueryString["errormessage"]))
-    {
-        <div style="background-color:red;color:white;font-weight: bold;">Error: @Request.QueryString["errormessage"]</div>
-    }
-</body>
-</html>
+﻿@section scripts {
+    <script type="text/javascript" src="~/Scripts/site/filemanager.js"></script>
+}
+<div class="row">
+    <div class="col-sm-3"></div>
+    <div class="col-sm-6">
+        <div class="logo-container text-shadow">
+            <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> Exam Scheduletron
+        </div>
+        @if (!Request.IsAuthenticated)
+        {
+                    <!-- If the user is not authenticated, display the sign-in button -->
+            <label class="full-width">
+                <span class="login-emblem-container">
+                    <span class="login-emblem">
+                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                        Sign In
+                    </span>
+                </span>
+                <input type="button" style="display: none;" onclick="location.href='@Url.Action("SignIn", "Home")'">
+            </label>
+        }
+        else
+        {
+            if (!string.IsNullOrWhiteSpace(Request.QueryString["errormessage"]))
+            {
+                <div style="background-color:red;color:white;font-weight: bold;">Error: @Request.QueryString["errormessage"]</div>
+            }
+            else
+            {
+            <div class="tool-panel panel box-shadow">
+                <div class="panel-body">
+                    <div class="user-details">
+                        <span class="pull-left" style="padding:6px 0">Hey there, @(ViewBag.UserName)!</span>
+                        <label class="btn btn-default pull-right" style="border:none;">
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                            <span>Sign Out</span>
+                            <input type="button" style="display: none;" onclick="location.href='@Url.Action("SignOut", "Home")'">
+                        </label>
+                    </div>
+                    <div class="clearfix"></div>
+                    <hr />
+                    @using (Html.BeginForm("ImportExcel", "Schedule", FormMethod.Post, new { id = "sheetSelect", enctype = "multipart/form-data" }))
+                    {
+                        <label id="schedule-upload-fromFile" class="full-width btn btn-default buffer-bottom">
+                            <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
+                            <span class="btn-label pull-left">Course Schedule From File (.xsls, .xsl)</span>
+                            <input type="file" name="sheetFile" style="display: none;" accept=".xlsx,.xls">
+                        </label>
+                            <label id="schedule-generate" class="full-width btn btn-info" style="display:none;">
+                                <span class="glyphicon glyphicon-download" aria-hidden="true"></span>
+                                <span class="btn-label pull-left">Generate Exam Schedule </span>
+                                <input type="submit" style="display: none;">
+                            </label>
+                    }
+                </div>
+            </div>
+            }
+        }
+    </div>
+    <div class="col-sm-3"></div>
+</div>

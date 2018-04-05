@@ -116,20 +116,6 @@ namespace Capstone.Controllers
                 return RedirectToAction("Error", "Home", new { message = "ERROR retrieving events", debug = ex.Message });
             }
         }
-
-        public ActionResult About()
-        {
-            ViewBag.Message = "Your application description page.";
-
-            return View();
-        }
-
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "";
-
-            return View();
-        }
         
         public void SignIn()
         {
