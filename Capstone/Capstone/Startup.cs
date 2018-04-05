@@ -1,78 +1,112 @@
 ﻿using System;
+using System.Configuration;
+using System.IdentityModel.Claims;
+using System.IdentityModel.Tokens;
 using System.Threading.Tasks;
-using Microsoft.Owin;
-using Owin;
+using System.Web;
+using Capstone.TokenStorage;
+using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.Owin.Security;
-using Microsoft.Owin.Security.Cookies;
-using Microsoft.Owin.Security.OpenIdConnect;
-using Microsoft.Owin.Security.Notifications;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Owin;
+using Microsoft.Owin.Security;
+using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.Notifications;
+using Microsoft.Owin.Security.OpenIdConnect;
+
+using Owin;
+
 
 [assembly: OwinStartup(typeof(Capstone.Startup))]
 
 namespace Capstone
 {
-    
     public class Startup
     {
-        // The Client ID is used by the application to uniquely identify itself to Azure AD.
-        string clientId = System.Configuration.ConfigurationManager.AppSettings["ClientId"];
+        public static string appId = ConfigurationManager.AppSettings["ida:AppId"];
+        public static string appPassword = ConfigurationManager.AppSettings["ida:AppPassword"];
+        public static string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
+        public static string[] scopes = ConfigurationManager.AppSettings["ida:AppScopes"]
+          .Replace(' ', ',').Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-        // RedirectUri is the URL where the user will be redirected to after they sign in.
-        string redirectUri = System.Configuration.ConfigurationManager.AppSettings["RedirectUri"];
-
-        // Tenant is the tenant ID (e.g. contoso.onmicrosoft.com, or 'common' for multi-tenant)
-        static string tenant = System.Configuration.ConfigurationManager.AppSettings["Tenant"];
-
-        // Authority is the URL for authority, composed by Azure Active Directory v2 endpoint and the tenant name (e.g. https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0)
-        string authority = String.Format(System.Globalization.CultureInfo.InvariantCulture, System.Configuration.ConfigurationManager.AppSettings["Authority"], tenant);
-
-        /// <summary>
-        /// Configure OWIN to use OpenIdConnect 
-        /// </summary>
-        /// <param name="app"></param>
         public void Configuration(IAppBuilder app)
         {
             app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
 
             app.UseCookieAuthentication(new CookieAuthenticationOptions());
+
             app.UseOpenIdConnectAuthentication(
-            new OpenIdConnectAuthenticationOptions
-            {
-                // Sets the ClientId, authority, RedirectUri as obtained from web.config
-                ClientId = clientId,
-                Authority = authority,
-                RedirectUri = redirectUri,
-                // PostLogoutRedirectUri is the page that users will be redirected to after sign-out. In this case, it is using the home page
-                PostLogoutRedirectUri = redirectUri,
-                Scope = OpenIdConnectScope.OpenIdProfile,
-                // ResponseType is set to request the id_token - which contains basic information about the signed-in user
-                ResponseType = OpenIdConnectResponseType.IdToken,
-                // ValidateIssuer set to false to allow personal and work accounts from any organization to sign in to your application
-                // To only allow users from a single organizations, set ValidateIssuer to true and 'tenant' setting in web.config to the tenant name
-                // To allow users from only a list of specific organizations, set ValidateIssuer to true and use ValidIssuers parameter 
-                TokenValidationParameters = new TokenValidationParameters() { ValidateIssuer = false },
-                // OpenIdConnectAuthenticationNotifications configures OWIN to send notification of failed authentications to OnAuthenticationFailed method
-                Notifications = new OpenIdConnectAuthenticationNotifications
-                {
-                    AuthenticationFailed = OnAuthenticationFailed
-                }
-            }
-        );
+              new OpenIdConnectAuthenticationOptions
+              {
+                  ClientId = appId,
+                  Authority = "https://login.microsoftonline.com/common/v2.0",
+                  Scope = "openid offline_access profile email " + string.Join(" ", scopes),
+                  RedirectUri = redirectUri,
+                  PostLogoutRedirectUri = "/",
+                  TokenValidationParameters = new TokenValidationParameters
+                  {
+                      // For demo purposes only, see below
+                      ValidateIssuer = false
+
+                      // In a real multitenant app, you would add logic to determine whether the
+                      // issuer was from an authorized tenant
+                      //ValidateIssuer = true,
+                      //IssuerValidator = (issuer, token, tvp) =>
+                      //{
+                      //  if (MyCustomTenantValidation(issuer))
+                      //  {
+                      //    return issuer;
+                      //  }
+                      //  else
+                      //  {
+                      //    throw new SecurityTokenInvalidIssuerException("Invalid issuer");
+                      //  }
+                      //}
+                  },
+                  Notifications = new OpenIdConnectAuthenticationNotifications
+                  {
+                      AuthenticationFailed = OnAuthenticationFailed,
+                      AuthorizationCodeReceived = OnAuthorizationCodeReceived
+                  }
+              }
+            );
         }
 
-        /// <summary>
-        /// Handle failed authentication requests by redirecting the user to the home page with an error in the query string
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        private Task OnAuthenticationFailed(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+        private Task OnAuthenticationFailed(AuthenticationFailedNotification<OpenIdConnectMessage,
+          OpenIdConnectAuthenticationOptions> notification)
         {
-            context.HandleResponse();
-            context.Response.Redirect("/?errormessage=" + context.Exception.Message);
+            notification.HandleResponse();
+            string redirect = "/Home/Error?message=" + notification.Exception.Message;
+            if (notification.ProtocolMessage != null && !string.IsNullOrEmpty(notification.ProtocolMessage.ErrorDescription))
+            {
+                redirect += "&debug=" + notification.ProtocolMessage.ErrorDescription;
+            }
+            notification.Response.Redirect(redirect);
             return Task.FromResult(0);
+        }
+
+        private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedNotification notification)
+        {
+            // Get the signed in user's id and create a token cache
+            string signedInUserId = notification.AuthenticationTicket.Identity.FindFirst(ClaimTypes.NameIdentifier).Value;
+            SessionTokenCache tokenCache = new SessionTokenCache(signedInUserId,
+                notification.OwinContext.Environment["System.Web.HttpContextBase"] as HttpContextBase);
+
+            ConfidentialClientApplication cca = new ConfidentialClientApplication(
+                appId, redirectUri, new ClientCredential(appPassword), tokenCache.GetMsalCacheInstance(), null);
+
+            try
+            {
+                var result = await cca.AcquireTokenByAuthorizationCodeAsync(notification.Code, scopes);
+            }
+            catch (MsalException ex)
+            {
+                string message = "AcquireTokenByAuthorizationCodeAsync threw an exception";
+                string debug = ex.Message;
+                notification.HandleResponse();
+                notification.Response.Redirect("/Home/Error?message=" + message + "&debug=" + debug);
+            }
         }
     }
 }
