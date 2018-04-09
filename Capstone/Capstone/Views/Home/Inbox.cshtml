@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Microsoft.Graph.Message>
+﻿@model DateTimeOffset
 
 @{
     ViewBag.Title = "Inbox";
@@ -19,19 +19,14 @@
         </th>
     </tr>
 
-    @foreach (var item in Model)
-    {
+
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Subject)
+
+                @(Model)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ReceivedDateTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.From.EmailAddress.Name) &lt;@Html.DisplayFor(modelItem => item.From.EmailAddress.Address)&gt;
-            </td>
+
         </tr>
-    }
+
 
 </table>

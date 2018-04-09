@@ -73,8 +73,9 @@ namespace Capstone.Controllers
                                     .Select("subject,receivedDateTime,from")
                                     .Top(10)
                                     .GetAsync();
-
-                return View(mailResults.CurrentPage);
+                var drive = await client.Me.Drive.Root.Request().GetAsync();
+                
+                return View(drive.CreatedDateTime);
             }
             catch (ServiceException ex)
             {
@@ -116,6 +117,8 @@ namespace Capstone.Controllers
                 return RedirectToAction("Error", "Home", new { message = "ERROR retrieving events", debug = ex.Message });
             }
         }
+
+
 
         public ActionResult About()
         {
