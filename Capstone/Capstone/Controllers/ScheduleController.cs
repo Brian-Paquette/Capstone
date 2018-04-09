@@ -95,8 +95,8 @@ namespace Capstone.Controllers
             Dictionary<string, Dictionary<string, Dictionary<string, string>>>
                 classes = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
             // FACULTYs logs all available program FACULTYs which are thne used to assign proctors.
-            // [Name, Available]
-            Dictionary<string, DateTime> faculty = new Dictionary<string, DateTime>();
+            // [Day][Name, Available]
+            Dictionary<string, Dictionary<string, DateTime>> faculty = new Dictionary<string, Dictionary<string, DateTime>>();
 
             foreach (DataRow row in classData.Tables[0].Rows)
             {
@@ -117,7 +117,9 @@ namespace Capstone.Controllers
                         { "DUR", row[DUR].ToString() }
                     };
                 // Establish FACULTYs
-                faculty[row[FACULTY].ToString()] = new DateTime();
+                if (!faculty.ContainsKey(row[DAY].ToString()))
+                    faculty[row[DAY].ToString()] = new Dictionary<string, DateTime>();
+                faculty[row[DAY].ToString()][row[FACULTY].ToString()] = new DateTime();
             }
             int iteration = 0;
             List<Exam> exams = new List<Exam>();
@@ -209,26 +211,30 @@ namespace Capstone.Controllers
             }
 
             // With all exams scheduled, we can now assign proctors!
-            List<string> facKeys = new List<string>(faculty.Keys);
+            List<string> weekdays = new List<string>(faculty.Keys);
             for (int i = 0; i < exams.Count(); i++)
             {
                 DateTime start = Convert.ToDateTime(exams[i].Start);
                 DateTime timeAvailable = Convert.ToDateTime(exams[i].End).AddMinutes(30);
-                foreach (string proctor in facKeys)
+                foreach (string weekday in weekdays)
                 {
-                    if (exams[i].Proctor != null)
-                        break;
-                    if (faculty[exams[i].Faculty] == null || faculty[exams[i].Faculty] < start)
+                    List<string> facultyAvailable = new List<string>(faculty[weekday].Keys);
+                    foreach (string proctor in facultyAvailable)
                     {
-                        faculty[proctor] = timeAvailable;
-                        exams[i].Proctor = proctor;
-                        break;
-                    }
-                    else if (faculty[proctor] == null || faculty[proctor] < start)
-                    {
-                        faculty[proctor] = timeAvailable;
-                        exams[i].Proctor = proctor;
-                        break;
+                        if (exams[i].Proctor != null)
+                            break;
+                        if (faculty[weekday][exams[i].Faculty] == null || faculty[weekday][exams[i].Faculty] < start)
+                        {
+                            faculty[weekday][proctor] = timeAvailable;
+                            exams[i].Proctor = proctor;
+                            break;
+                        }
+                        else if (faculty[weekday][proctor] == null || faculty[weekday][proctor] < start)
+                        {
+                            faculty[weekday][proctor] = timeAvailable;
+                            exams[i].Proctor = proctor;
+                            break;
+                        }
                     }
                 }
             }
