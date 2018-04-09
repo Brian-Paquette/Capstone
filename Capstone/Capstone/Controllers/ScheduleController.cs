@@ -86,7 +86,7 @@ namespace Capstone.Controllers
             int END = 7;
             int DUR = 8;
 
-            // roomSlots logs available rooms in a series of dictionary layers to optimizate iteration patterns.
+            // weekdays logs available rooms in a series of dictionary layers to optimizate iteration patterns.
             // [Day][StartTime][Room, EndTime]
             Dictionary<string, Dictionary<string, Dictionary<string, string>>>
                 rooms = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
@@ -126,21 +126,21 @@ namespace Capstone.Controllers
             List<string> roomKeys = new List<string>(rooms.Keys);
 
             // This loop restricts exams from being placed in time slots that might need to accomodate larger section splits
-            while(classKeys.Count > 0 && iteration <= 1)
+            while (classKeys.Count > 0 && iteration <= 1)
             {
-                foreach (string classSlot in classKeys)
+                foreach (string progCode in classKeys)
                 {
                     // All weekdays.
-                    foreach (string roomSlot in roomKeys)
+                    foreach (string weekday in roomKeys)
                     {
                         // All time entries within a week day. For example, 12:00. Contains all rooms and end times for rooms that start at 12.
-                        List<string> timeKeys = new List<string>(rooms[roomSlot].Keys);
-                        foreach (string timeSlot in timeKeys)
+                        List<string> timeKeys = new List<string>(rooms[weekday].Keys);
+                        foreach (string timeOfDay in timeKeys)
                         {
-                            // This condition verifies whether or not this specific timeslot (E.G. 12:00) contains as many available rooms as there are
+                            // This condition verifies whether or not this specific timeOfDay (E.G. 12:00) contains as many available rooms as there are
                             // sections in a class.
-                            if (rooms[roomSlot][timeSlot].Count() == classes[classSlot].Count() 
-                                || (iteration == 1 && rooms[roomSlot][timeSlot].Count() >= classes[classSlot].Count()))
+                            if (rooms[weekday][timeOfDay].Count() == classes[progCode].Count()
+                                || (iteration == 1 && rooms[weekday][timeOfDay].Count() >= classes[progCode].Count()))
                             {
                                 // Next, we need to verify that this room slot is large enough to accomodate our exam duration
                                 bool valid = true;
@@ -148,21 +148,21 @@ namespace Capstone.Controllers
                                 DateTime end = DateTime.Now;
                                 try
                                 {
-                                    start = Convert.ToDateTime(timeSlot);
+                                    start = Convert.ToDateTime(timeOfDay);
 
-                                    List<string> spefRoomKeys = new List<string>(rooms[roomSlot][timeSlot].Keys);
+                                    List<string> spefRoomKeys = new List<string>(rooms[weekday][timeOfDay].Keys);
                                     foreach (string room in spefRoomKeys)
                                     {
-                                        if (rooms[roomSlot][timeSlot][room] == null)
+                                        if (rooms[weekday][timeOfDay][room] == null)
                                             continue;
                                         try
                                         {
-                                            end = Convert.ToDateTime(rooms[roomSlot][timeSlot][room]);
+                                            end = Convert.ToDateTime(rooms[weekday][timeOfDay][room]);
                                             TimeSpan roomAvailability = end.Subtract(start);
-                                            List<string> sectionKeys = new List<string>(classes[classSlot].Keys);
+                                            List<string> sectionKeys = new List<string>(classes[progCode].Keys);
                                             foreach (string section in sectionKeys)
                                             {
-                                                if (int.Parse(classes[classSlot][section]["DUR"].ToString()) > roomAvailability.Hours)
+                                                if (int.Parse(classes[progCode][section]["DUR"].ToString()) > roomAvailability.Hours)
                                                     valid = false;
                                             }
                                         }
@@ -174,27 +174,29 @@ namespace Capstone.Controllers
                                 // If this room slot is valid, it means all of our sections can be accomodated here! Yipee!!
                                 if (valid)
                                 {
-                                    List<string> sectionKeys = new List<string>(classes[classSlot].Keys);
+                                    List<string> sectionKeys = new List<string>(classes[progCode].Keys);
                                     foreach (string section in sectionKeys)
                                     {
-                                        List<string> spefRoomKeys = new List<string>(rooms[roomSlot][timeSlot].Keys);
+                                        List<string> spefRoomKeys = new List<string>(rooms[weekday][timeOfDay].Keys);
                                         foreach (string room in spefRoomKeys)
                                         {
                                             Exam sectionExam = new Exam();
-                                            sectionExam.Code = classSlot;
-                                            sectionExam.Name = classes[classSlot][section]["NAME"];
+                                            sectionExam.Code = progCode;
+                                            sectionExam.Name = classes[progCode][section]["NAME"];
                                             sectionExam.Section = section;
-                                            sectionExam.Faculty = classes[classSlot][section]["FACULTY"];
+                                            sectionExam.Faculty = classes[progCode][section]["FACULTY"];
                                             sectionExam.Proctor = null;
                                             sectionExam.Room = room;
-                                            sectionExam.Time = string.Format("{0:hh:mm tt}", start) + "-" + string.Format("{0:hh:mm tt}", end);
-                                            sectionExam.Duration = classes[classSlot][section]["DUR"] + " hour(s)";
+                                            sectionExam.Day = weekday;
+                                            sectionExam.Start = string.Format("{0:hh:mm tt}", start);
+                                            sectionExam.End = string.Format("{0:hh:mm tt}", end);
+                                            sectionExam.Duration = classes[progCode][section]["DUR"] + " hour(s)";
                                             exams.Add(sectionExam);
 
-                                            rooms[roomSlot][timeSlot].Remove(room);
+                                            rooms[weekday][timeOfDay].Remove(room);
                                             break;
                                         }
-                                        classes[classSlot].Remove(section);
+                                        classes[progCode].Remove(section);
                                     }
                                 }
                             }
@@ -206,29 +208,33 @@ namespace Capstone.Controllers
                 roomKeys = new List<string>(rooms.Keys);
             }
 
-            //// With all exams scheduled, we can now assign proctors!
-            //List<string> facKeys = new List<string>(faculty.Keys);
-            //for (int i = 0; i <= exams.Count(); i++)
-            //{
-            //    int timeSplit = exams[i].Time.IndexOf("-");
-            //    DateTime start = Convert.ToDateTime(exams[i].Time.Substring(0, timeSplit));
-            //    DateTime end = Convert.ToDateTime(exams[i].Time.Substring(timeSplit));
-            //    DateTime facTimeSet = end.AddMinutes(30);
-            //    foreach (string proctor in facKeys)
-            //    {
-            //        if (faculty[proctor] == null)
-            //        {
-            //            faculty[proctor] = facTimeSet;
-            //            exams[i].Proctor = proctor;
-            //        }
-            //        if (faculty[proctor] < start)
-            //        {
-            //            faculty[proctor] = facTimeSet;
-            //            exams[i].Proctor = proctor;
-            //        }
-            //    }
-            //}
+            // With all exams scheduled, we can now assign proctors!
+            List<string> facKeys = new List<string>(faculty.Keys);
+            for (int i = 0; i < exams.Count(); i++)
+            {
+                DateTime start = Convert.ToDateTime(exams[i].Start);
+                DateTime timeAvailable = Convert.ToDateTime(exams[i].End).AddMinutes(30);
+                foreach (string proctor in facKeys)
+                {
+                    if (exams[i].Proctor != null)
+                        break;
+                    if (faculty[exams[i].Faculty] == null || faculty[exams[i].Faculty] < start)
+                    {
+                        faculty[proctor] = timeAvailable;
+                        exams[i].Proctor = proctor;
+                        break;
+                    }
+                    else if (faculty[proctor] == null || faculty[proctor] < start)
+                    {
+                        faculty[proctor] = timeAvailable;
+                        exams[i].Proctor = proctor;
+                        break;
+                    }
+                }
+            }
             Debug.WriteLine(JsonConvert.SerializeObject(exams, Formatting.Indented));
+            Debug.WriteLine(JsonConvert.SerializeObject(classes, Formatting.Indented));
+            Debug.WriteLine(JsonConvert.SerializeObject(faculty, Formatting.Indented));
             return null;
         }
 
