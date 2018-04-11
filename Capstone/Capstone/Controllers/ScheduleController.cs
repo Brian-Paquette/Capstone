@@ -94,9 +94,11 @@ namespace Capstone.Controllers
             // [Code][Section][Name, FACULTY, Duration]
             Dictionary<string, Dictionary<string, Dictionary<string, string>>>
                 classes = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
-            // FACULTYs logs all available program FACULTYs which are thne used to assign proctors.
+            // faculty is a list of all faculty discovered in the submission sheet
+            List<string> faculty = new List<string>();
+            // facultySchedule keeps track of all available faculty by for every weekday.
             // [Day][Name, Available]
-            Dictionary<string, Dictionary<string, DateTime>> faculty = new Dictionary<string, Dictionary<string, DateTime>>();
+            Dictionary<string, Dictionary<string, DateTime>> facultySchedule = new Dictionary<string, Dictionary<string, DateTime>>();
 
             foreach (DataRow row in classData.Tables[0].Rows)
             {
@@ -116,14 +118,22 @@ namespace Capstone.Controllers
                         { "FACULTY", row[FACULTY].ToString() },
                         { "DUR", row[DUR].ToString() }
                     };
-                // Establish FACULTYs
-                if (!faculty.ContainsKey(row[DAY].ToString()))
-                    faculty[row[DAY].ToString()] = new Dictionary<string, DateTime>();
-                faculty[row[DAY].ToString()][row[FACULTY].ToString()] = new DateTime();
+                if (!faculty.Contains(row[FACULTY].ToString()))
+                    faculty.Add(row[FACULTY].ToString());
+                // Establish faculty schedule weekdays
+                if (!facultySchedule.ContainsKey(row[DAY].ToString())) { }
+                    facultySchedule[row[DAY].ToString()] = new Dictionary<string, DateTime>();
+            }
+            // Develop list of faculty within scheduling weekday
+            List<string> scheduleKeys = new List<string>(facultySchedule.Keys);
+            foreach (string weekday in scheduleKeys)
+            {
+                foreach (string person in faculty)
+                    facultySchedule[weekday].Add(person, new DateTime());
             }
             int iteration = 0;
-            List<Exam> exams = new List<Exam>();
 
+            List<Exam> exams = new List<Exam>();
             List<string> classKeys = new List<string>(classes.Keys);
             List<string> roomKeys = new List<string>(rooms.Keys);
 
