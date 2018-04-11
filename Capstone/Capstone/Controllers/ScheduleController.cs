@@ -219,38 +219,34 @@ namespace Capstone.Controllers
                 classKeys = new List<string>(classes.Keys);
                 roomKeys = new List<string>(rooms.Keys);
             }
-
             // With all exams scheduled, we can now assign proctors!
-            List<string> weekdays = new List<string>(faculty.Keys);
+            List<string> weekdays = new List<string>(facultySchedule.Keys);
             for (int i = 0; i < exams.Count(); i++)
             {
                 DateTime start = Convert.ToDateTime(exams[i].Start);
                 DateTime timeAvailable = Convert.ToDateTime(exams[i].End).AddMinutes(30);
-                foreach (string weekday in weekdays)
+                List<string> facultyAvailable = new List<string>(facultySchedule[exams[i].Day].Keys);
+                foreach (string proctor in facultyAvailable)
                 {
-                    List<string> facultyAvailable = new List<string>(faculty[weekday].Keys);
-                    foreach (string proctor in facultyAvailable)
+                    if (exams[i].Proctor != null)
+                        break;
+                    if (facultySchedule[exams[i].Day][exams[i].Faculty] == new DateTime() || facultySchedule[exams[i].Day][exams[i].Faculty] < start)
                     {
-                        if (exams[i].Proctor != null)
-                            break;
-                        if (faculty[weekday][exams[i].Faculty] == null || faculty[weekday][exams[i].Faculty] < start)
-                        {
-                            faculty[weekday][proctor] = timeAvailable;
-                            exams[i].Proctor = proctor;
-                            break;
-                        }
-                        else if (faculty[weekday][proctor] == null || faculty[weekday][proctor] < start)
-                        {
-                            faculty[weekday][proctor] = timeAvailable;
-                            exams[i].Proctor = proctor;
-                            break;
-                        }
+                        facultySchedule[exams[i].Day][exams[i].Faculty] = timeAvailable;
+                        exams[i].Proctor = exams[i].Faculty;
+                        break;
+                    }
+                    else if (facultySchedule[exams[i].Day][proctor] == new DateTime() || facultySchedule[exams[i].Day][proctor] < start)
+                    {
+                        facultySchedule[exams[i].Day][proctor] = timeAvailable;
+                        exams[i].Proctor = proctor;
+                        break;
                     }
                 }
             }
             Debug.WriteLine(JsonConvert.SerializeObject(exams, Formatting.Indented));
-            Debug.WriteLine(JsonConvert.SerializeObject(classes, Formatting.Indented));
-            Debug.WriteLine(JsonConvert.SerializeObject(faculty, Formatting.Indented));
+            //Debug.WriteLine(JsonConvert.SerializeObject(classes, Formatting.Indented));
+            Debug.WriteLine(JsonConvert.SerializeObject(facultySchedule, Formatting.Indented));
             return null;
         }
 
