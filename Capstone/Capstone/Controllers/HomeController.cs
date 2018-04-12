@@ -85,6 +85,38 @@ namespace Capstone.Controllers
             else { return RedirectToAction("SignOut", "Home", null); }
         }
 
+        public async Task<ActionResult> OneDriveUpload()
+        {
+            string token = await GetAccessToken();
+            if (string.IsNullOrEmpty(token))
+            {
+                // If there's no token in the session, redirect to Home
+                return Redirect("/");
+            }
+
+            GraphServiceClient client = new GraphServiceClient(
+                new DelegateAuthenticationProvider(
+                    (requestMessage) =>
+                    {
+                        requestMessage.Headers.Authorization =
+                            new AuthenticationHeaderValue("Bearer", token);
+
+                        return Task.FromResult(0);
+                    }));
+
+            try
+            {
+                var driveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
+                var driveItem2 = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Request().GetAsync();
+                var driveItem3 = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().GetAsync();
+                return View(driveItem2);
+            }
+            catch (ServiceException ex)
+            {
+                return RedirectToAction("Error", "Home", new { message = "ERROR retrieving messages", debug = ex.Message });
+            }
+        }
+
         public async Task<ActionResult> Calendar()
         {
             if (Request.IsAuthenticated)

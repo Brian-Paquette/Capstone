@@ -460,6 +460,7 @@
     <Content Include="Views\Home\Calendar.cshtml" />
     <Content Include="Views\Home\Preferences.cshtml" />
     <Content Include="Views\Home\History.cshtml" />
+    <Content Include="Views\Home\OneDriveUpload.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1133,3 +1133,4 @@ C:\Users\zmeadows2626\Desktop\Capstone\Capstone\Capstone\obj\Debug\Capstone.cspr
 C:\Users\zmeadows2626\Desktop\Capstone\Capstone\Capstone\obj\Debug\Capstone.csproj.CoreCompileInputs.cache
 C:\Users\zmeadows2626\Desktop\Capstone\Capstone\Capstone\obj\Debug\Capstone.dll
 C:\Users\zmeadows2626\Desktop\Capstone\Capstone\Capstone\obj\Debug\Capstone.pdb
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\obj\Debug\Capstone.csprojResolveAssemblyReference.cache
