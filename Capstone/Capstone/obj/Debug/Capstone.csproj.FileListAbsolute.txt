@@ -847,3 +847,4 @@ C:\Users\bpaquette6801\Desktop\Capstone\Capstone\Capstone\obj\Debug\Capstone.csp
 C:\Users\bpaquette6801\Desktop\Capstone\Capstone\Capstone\obj\Debug\Capstone.csproj.CoreCompileInputs.cache
 C:\Users\bpaquette6801\Desktop\Capstone\Capstone\Capstone\obj\Debug\Capstone.dll
 C:\Users\bpaquette6801\Desktop\Capstone\Capstone\Capstone\obj\Debug\Capstone.pdb
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\obj\Debug\Capstone.csprojResolveAssemblyReference.cache
