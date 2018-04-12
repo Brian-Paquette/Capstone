@@ -458,6 +458,8 @@
     <Content Include="Views\Claims\Index.cshtml" />
     <Content Include="Views\Home\Inbox.cshtml" />
     <Content Include="Views\Home\Calendar.cshtml" />
+    <Content Include="Views\Home\Preferences.cshtml" />
+    <Content Include="Views\Home\History.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

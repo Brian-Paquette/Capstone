@@ -184,5 +184,21 @@ namespace Capstone.Controllers
 
             return accessToken;
         }
+        public ActionResult Preferences()
+        {
+            if (Request.IsAuthenticated)
+            {
+                return View();
+            }
+            else { return RedirectToAction("SignOut", "Home", null); }
+        }
+        public ActionResult History()
+        {
+            if (Request.IsAuthenticated)
+            {
+                return View();
+            }
+            else { return RedirectToAction("SignOut", "Home", null); }
+        }
     }
 }
