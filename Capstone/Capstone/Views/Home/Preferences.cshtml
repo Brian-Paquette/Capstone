@@ -7,7 +7,28 @@
     <div class="tool-panel panel box-shadow">
         <div class="panel-body">
             <h3 class="faded">User Preferences</h3>
-
+            <hr />
+            @using (Html.BeginForm("SavePreferences", "Home", FormMethod.Post, new { id = "userPreferences", enctype = "multipart/form-data" }))
+            {
+                <label class="btn btn-info pull-right faded">
+                    <span>Save Changes</span>
+                    <input type="submit" style="display: none;">
+                </label>
+                <label id="lblUploadDirectory">
+                    <span>File Upload One Drive Directory</span>
+                    <input type="text" class="form-control" name="uploadDirectory" value="/Exam Scheduler/Uploads" placeholder="/Exam Scheduler/Uploads">
+                </label>
+                <br />
+                <label id="lblExamDirectory">
+                    <span>Exam Generation One Drive Directory</span>
+                    <input type="text" class="form-control" name="ExamDirectory" value="/Exam Scheduler/Exams" placeholder="/Exam Scheduler/Uploads">
+                </label>
+                <br>
+                <label id="lblCalendarGen">
+                    <span>Generate Calendar View?</span>
+                    <input type="checkbox" class="form-control" name="calGen">
+                </label>
+            }
             <hr />
             <label class="btn btn-default pull-right faded" style="border:none;">
                 <span class="faded">Return</span>
