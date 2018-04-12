@@ -23,7 +23,7 @@ namespace Capstone.Controllers
         }
 
         [HttpPost]
-        public ActionResult ImportExcel(HttpPostedFileBase sheetFile)
+        public ActionResult ImportExcelFromFile(HttpPostedFileBase sheetFile)
         {
             if (sheetFile == null || sheetFile.ContentLength == 0)
             {
@@ -33,7 +33,39 @@ namespace Capstone.Controllers
             {
                 TempData["UploadSuccess"] = "Upload successful!";
                 // Do processing
-                ProcessSchedule(sheetFile);
+                try
+                {
+                    ProcessSchedule(sheetFile);
+                }
+                catch (Exception e)
+                {
+                    TempData["UploadError"] = "Please upload a valid file.";
+                }
+            }
+            else
+            {
+                TempData["UploadError"] = "Please upload a valid file.";
+            }
+            return RedirectToAction("Index", "Home", null);
+        }
+        [HttpPost]
+        public ActionResult ImportExcelFromCloud(HttpPostedFileBase sheetFile)
+        {
+            if (sheetFile == null || sheetFile.ContentLength == 0)
+            {
+                TempData["UploadError"] = "You must upload a file.";
+            }
+            if (sheetFile.FileName.EndsWith(".xls") || sheetFile.FileName.EndsWith(".xlsx"))
+            {
+                TempData["UploadSuccess"] = "Upload successful!";
+                // Do processing
+                try
+                {
+                    ProcessSchedule(sheetFile);
+                } catch(Exception e)
+                {
+                    TempData["UploadError"] = "Please upload a valid file.";
+                }
             }
             else
             {
@@ -67,7 +99,6 @@ namespace Capstone.Controllers
             sheetAdapter.Fill(sheetData);
             conn.Close();
             DataSet examSchedule = GenerateExamSchedule(sheetData);
-            //Debug.WriteLine(JsonConvert.SerializeObject(examSchedule, Formatting.Indented));
         }
 
         public DataSet GenerateExamSchedule(DataSet classData)
