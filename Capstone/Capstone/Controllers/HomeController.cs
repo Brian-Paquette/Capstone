@@ -145,17 +145,21 @@ namespace Capstone.Controllers
 
             try
             {
+                //get file you want to upload
                 string path = @"C:/Users/b_paquette/Desktop/testUpload.xlsx";
+                //convert file into byte array
                 byte[] data = System.IO.File.ReadAllBytes(path);
+                //convert byte array into writable stream
                 Stream stream = new MemoryStream(data);
-                             
-                // for updating existing file
+
+                //Get all items in drive
+                var driveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
+
+                // for updating existing file, specify file you want to update using Items[itemid]
                 await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().PutAsync<DriveItem>(stream);
 
-                // For uploading new file
+                // For uploading new file, specify file name is necessary with ItemWithPath(filename)
                 await client.Me.Drive.Root.ItemWithPath("newUpload.xlsx").Content.Request().PutAsync<DriveItem>(stream);
-
-                IEnumerable<Option> options;
 
 
 
@@ -192,11 +196,14 @@ namespace Capstone.Controllers
             {
 
                 var DriveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
+                //Get specific item based on itemID using items[itemid], use .content to get stream (byte data)
                 Stream stream = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().GetAsync();
+                //path where you want to download
                 string path = @"C:/Users/b_paquette/Desktop/test.xlsx";
                 if (!System.IO.File.Exists(path))
                 {
-                    FileStream fs = System.IO.File.Create(@"C:/Users/b_paquette/Desktop/test.xlsx", (int)stream.Length);
+                    // create filestream for writing data
+                    FileStream fs = System.IO.File.Create(path, (int)stream.Length);
                     byte[] bytesInStream = new byte[stream.Length];
                     stream.Read(bytesInStream, 0, bytesInStream.Length);
                     fs.Write(bytesInStream, 0, bytesInStream.Length);
@@ -210,7 +217,7 @@ namespace Capstone.Controllers
                 else
                 {
                     System.IO.File.Delete(path);
-                    FileStream fs = System.IO.File.Create(@"C:/Users/b_paquette/Desktop/test.xlsx", (int)stream.Length);
+                    FileStream fs = System.IO.File.Create(path, (int)stream.Length);
                     byte[] bytesInStream = new byte[stream.Length];
                     stream.Read(bytesInStream, 0, bytesInStream.Length);
                     fs.Write(bytesInStream, 0, bytesInStream.Length);
