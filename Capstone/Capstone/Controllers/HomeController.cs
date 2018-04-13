@@ -13,6 +13,8 @@ using Microsoft.Identity.Client;
 using Capstone.TokenStorage;
 using Microsoft.Graph;
 using System.Net.Http.Headers;
+using System.Net;
+using System.IO;
 
 namespace Capstone.Controllers
 {
@@ -85,7 +87,7 @@ namespace Capstone.Controllers
             else { return RedirectToAction("SignOut", "Home", null); }
         }
 
-        public async Task<ActionResult> OneDriveUpload()
+        public async Task<ActionResult> OneDrive()
         {
             string token = await GetAccessToken();
             if (string.IsNullOrEmpty(token))
@@ -106,14 +108,81 @@ namespace Capstone.Controllers
 
             try
             {
-                var driveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
-                var driveItem2 = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Request().GetAsync();
-                var driveItem3 = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().GetAsync();
-                return View(driveItem2);
+                
+                var DriveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
+                Stream stream = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().GetAsync();
+                FileStream fs = System.IO.File.Create(@"C:/Users/b_paquette/Desktop/test.xlsx",(int)stream.Length);
+                byte[] bytesInStream = new byte[stream.Length];
+                stream.Read(bytesInStream, 0, bytesInStream.Length);
+                fs.Write(bytesInStream, 0, bytesInStream.Length);
+
+                return View(DriveItem);
             }
             catch (ServiceException ex)
             {
                 return RedirectToAction("Error", "Home", new { message = "ERROR retrieving messages", debug = ex.Message });
+            }
+        }
+        // call this to download the file
+        public async Task<ActionResult> OneDriveDownload()
+        {
+            string token = await GetAccessToken();
+            if (string.IsNullOrEmpty(token))
+            {
+                // If there's no token in the session, redirect to Home
+                return Redirect("/");
+            }
+
+            GraphServiceClient client = new GraphServiceClient(
+                new DelegateAuthenticationProvider(
+                    (requestMessage) =>
+                    {
+                        requestMessage.Headers.Authorization =
+                            new AuthenticationHeaderValue("Bearer", token);
+
+                        return Task.FromResult(0);
+                    }));
+
+            try
+            {
+
+                var DriveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
+                Stream stream = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().GetAsync();
+                string path = @"C:/Users/b_paquette/Desktop/test.xlsx";
+                if (!System.IO.File.Exists(@"C:/Users/b_paquette/Desktop/test.xlsx"))
+                {
+                    FileStream fs = System.IO.File.Create(@"C:/Users/b_paquette/Desktop/test.xlsx", (int)stream.Length);
+                    byte[] bytesInStream = new byte[stream.Length];
+                    stream.Read(bytesInStream, 0, bytesInStream.Length);
+                    fs.Write(bytesInStream, 0, bytesInStream.Length);
+                    fs.Close();
+                    fs.Dispose();
+                    stream.Close();
+                    stream.Dispose();
+                    ViewBag.error = "SUCCESS!";
+                    return View("Index");
+                }
+                else
+                {
+                    ViewBag.error = "File already Exists";
+                    return View("Index");
+                }
+                
+            }
+            catch (ServiceException ex)
+            {
+                return RedirectToAction("Error", "Home", new { message = "ERROR retrieving messages", debug = ex.Message });
+            }
+        }
+
+
+        private static void CopyStream(Stream input, Stream output)
+        {
+            byte[] buffer = new byte[8 * 1024];
+            int len;
+            while ((len = input.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                output.Write(buffer, 0, len);
             }
         }
 

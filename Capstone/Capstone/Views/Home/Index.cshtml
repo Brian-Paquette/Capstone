@@ -73,12 +73,15 @@
                         <span class="btn-label pull-left">Generation History</span>
                         <input type="button" style="display: none;" onclick="location.href='@Url.Action("History", "Home")'">
                     </label>
-                    <label id="btnHistory" class="full-width btn btn-default buffer-bottom">
+                    <label id="btnOneDrive" class="full-width btn btn-default buffer-bottom">
                         <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
                         <span class="btn-label pull-left">API STUFF</span>
-                        <input type="button" style="display: none;" onclick="location.href='@Url.Action("OneDriveUpload", "Home")'">
+                        <input type="button" style="display: none;" onclick="location.href='@Url.Action("OneDrive", "Home")'">
                     </label>
                 </div>
+                <label>
+                    @ViewBag.error
+                </label>
             </div>
         }
     }
