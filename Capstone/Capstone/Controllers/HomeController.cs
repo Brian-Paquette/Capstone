@@ -111,10 +111,6 @@ namespace Capstone.Controllers
                 
                 var DriveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
                 Stream stream = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().GetAsync();
-                FileStream fs = System.IO.File.Create(@"C:/Users/b_paquette/Desktop/test.xlsx",(int)stream.Length);
-                byte[] bytesInStream = new byte[stream.Length];
-                stream.Read(bytesInStream, 0, bytesInStream.Length);
-                fs.Write(bytesInStream, 0, bytesInStream.Length);
 
                 return View(DriveItem);
             }
@@ -149,7 +145,7 @@ namespace Capstone.Controllers
                 var DriveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
                 Stream stream = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().GetAsync();
                 string path = @"C:/Users/b_paquette/Desktop/test.xlsx";
-                if (!System.IO.File.Exists(@"C:/Users/b_paquette/Desktop/test.xlsx"))
+                if (!System.IO.File.Exists(path))
                 {
                     FileStream fs = System.IO.File.Create(@"C:/Users/b_paquette/Desktop/test.xlsx", (int)stream.Length);
                     byte[] bytesInStream = new byte[stream.Length];
@@ -159,12 +155,22 @@ namespace Capstone.Controllers
                     fs.Dispose();
                     stream.Close();
                     stream.Dispose();
-                    ViewBag.error = "SUCCESS!";
+                    ViewBag.error = "File created!";
                     return View("Index");
                 }
                 else
                 {
-                    ViewBag.error = "File already Exists";
+                    System.IO.File.Delete(path);
+                    FileStream fs = System.IO.File.Create(@"C:/Users/b_paquette/Desktop/test.xlsx", (int)stream.Length);
+                    byte[] bytesInStream = new byte[stream.Length];
+                    stream.Read(bytesInStream, 0, bytesInStream.Length);
+                    fs.Write(bytesInStream, 0, bytesInStream.Length);
+                    fs.Close();
+                    fs.Dispose();
+                    stream.Close();
+                    stream.Dispose();
+                    
+                    ViewBag.error = "File replaced!";
                     return View("Index");
                 }
                 
