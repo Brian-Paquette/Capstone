@@ -111,7 +111,9 @@ namespace Capstone.Controllers
                 
                 var DriveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
                 Stream stream = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().GetAsync();
+                string var = client.BaseUrl;
 
+                ViewBag.message = var;
                 return View(DriveItem);
             }
             catch (ServiceException ex)
@@ -119,6 +121,53 @@ namespace Capstone.Controllers
                 return RedirectToAction("Error", "Home", new { message = "ERROR retrieving messages", debug = ex.Message });
             }
         }
+
+
+        public async Task<ActionResult> OneDriveUpload()
+        {
+            string token = await GetAccessToken();
+            if (string.IsNullOrEmpty(token))
+            {
+                // If there's no token in the session, redirect to Home
+                return Redirect("/");
+            }
+
+            GraphServiceClient client = new GraphServiceClient(
+                new DelegateAuthenticationProvider(
+                    (requestMessage) =>
+                    {
+                        requestMessage.Headers.Authorization =
+                            new AuthenticationHeaderValue("Bearer", token);
+
+                        return Task.FromResult(0);
+                    }));
+
+
+            try
+            {
+                string path = @"C:/Users/b_paquette/Desktop/testUpload.xlsx";
+                byte[] data = System.IO.File.ReadAllBytes(path);
+                Stream stream = new MemoryStream(data);
+                             
+                // for updating existing file
+                await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().PutAsync<DriveItem>(stream);
+
+                // For uploading new file
+                await client.Me.Drive.Root.ItemWithPath("newUpload.xlsx").Content.Request().PutAsync<DriveItem>(stream);
+
+                IEnumerable<Option> options;
+
+
+
+                return View("Index");
+            }
+            catch (ServiceException ex)
+            {
+                return RedirectToAction("Error", "Home", new { message = "ERROR retrieving messages", debug = ex.Message });
+            }
+        }
+
+
         // call this to download the file
         public async Task<ActionResult> OneDriveDownload()
         {
