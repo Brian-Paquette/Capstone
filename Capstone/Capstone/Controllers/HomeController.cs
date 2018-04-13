@@ -13,6 +13,9 @@ using Microsoft.Identity.Client;
 using Capstone.TokenStorage;
 using Microsoft.Graph;
 using System.Net.Http.Headers;
+using System.Data.OleDb;
+using Capstone.Models;
+using System.Globalization;
 
 namespace Capstone.Controllers
 {
@@ -196,7 +199,29 @@ namespace Capstone.Controllers
         {
             if (Request.IsAuthenticated)
             {
+                List<History> historyList = new List<History>();
+                OleDbConnection connection = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\Alex\Desktop\Capstone\CapstoneDatabase.accdb");
+                connection.Open();
+                OleDbDataReader reader = null;
+                OleDbCommand command = new OleDbCommand("SELECT * from  History", connection);
+                reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    History h = new History();
+                    h.Id= Convert.ToInt32(reader["ID"]);
+                    h.FileName = reader["FileName"].ToString();
+                    h.ExamFileName = reader["ExamFileName"].ToString();
+                    h.CalendarURL = reader["CalendarURL"].ToString();
+                    h.GenDate = DateTime.ParseExact(reader["GenDate"].ToString(),"yyyy-MM-dd", new CultureInfo("en-US"));
+                    h.User = reader["User"].ToString();
+
+                    historyList.Add(h);
+                }
+
+                connection.Close();
+                ViewBag.HistoryList = historyList;
                 return View();
+              
             }
             else { return RedirectToAction("SignOut", "Home", null); }
         }
