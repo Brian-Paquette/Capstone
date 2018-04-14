@@ -203,7 +203,7 @@ namespace Capstone.Controllers
                 OleDbConnection connection = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\Alex\Desktop\Capstone\CapstoneDatabase.accdb");
                 connection.Open();
                 OleDbDataReader reader = null;
-                OleDbCommand command = new OleDbCommand("SELECT * from  History", connection);
+                OleDbCommand command = new OleDbCommand("SELECT top 100 * from  History order by GenDate desc", connection);
                 reader = command.ExecuteReader();
                 while (reader.Read())
                 {
@@ -212,7 +212,6 @@ namespace Capstone.Controllers
                     h.FileName = reader["FileName"].ToString();
                     h.ExamFileName = reader["ExamFileName"].ToString();
                     h.CalendarURL = reader["CalendarURL"].ToString();
-                    string test = reader["GenDate"].ToString();
                     h.GenDate = DateTime.Parse(reader["GenDate"].ToString());
                     h.User = reader["User"].ToString();
 
