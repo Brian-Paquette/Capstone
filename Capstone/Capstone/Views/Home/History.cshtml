@@ -17,13 +17,16 @@
                         <th>User</th>
                     </tr>
                     <!--LOOP FOR ALL RECORDS-->
+                    @foreach (var history in ViewBag.HistoryList)
+                    {
                     <tr>
-                        <td>Fill</td>
-                        <td>Fill</td>
-                        <td>Fill</td>
-                        <td>Fill</td>
-                        <td>Fill</td>
+                        <td>@history.FileName</td>
+                        <td>@history.ExamFileName</td>
+                        <td>@history.GenDate</td>
+                        <td>@history.CalendarURL</td>
+                        <td>@history.User</td>
                     </tr>
+                    }
                     <!---->
                 </table>
             </div>

@@ -208,11 +208,12 @@ namespace Capstone.Controllers
                 while (reader.Read())
                 {
                     History h = new History();
-                    h.Id= Convert.ToInt32(reader["ID"]);
+
                     h.FileName = reader["FileName"].ToString();
                     h.ExamFileName = reader["ExamFileName"].ToString();
                     h.CalendarURL = reader["CalendarURL"].ToString();
-                    h.GenDate = DateTime.ParseExact(reader["GenDate"].ToString(),"yyyy-MM-dd", new CultureInfo("en-US"));
+                    string test = reader["GenDate"].ToString();
+                    h.GenDate = DateTime.Parse(reader["GenDate"].ToString());
                     h.User = reader["User"].ToString();
 
                     historyList.Add(h);
