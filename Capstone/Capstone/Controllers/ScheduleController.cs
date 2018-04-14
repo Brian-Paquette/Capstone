@@ -105,7 +105,7 @@ namespace Capstone.Controllers
             db.NewHistoryEntry(sheetFile.FileName, "Exam_"+ sheetFile.FileName, "TODO", Session["USER"].ToString());
 
             APIManager drive = new APIManager();
-            drive.Upload(HttpContext, path, sheetFile.FileName).Wait();
+            drive.Upload(HttpContext, path, sheetFile.FileName).Start();
         }
 
         public DataSet GenerateExamSchedule(DataSet classData)
@@ -284,7 +284,6 @@ namespace Capstone.Controllers
             }
             Debug.WriteLine(JsonConvert.SerializeObject(exams, Formatting.Indented));
             //Debug.WriteLine(JsonConvert.SerializeObject(classes, Formatting.Indented));
-            Debug.WriteLine(JsonConvert.SerializeObject(facultySchedule, Formatting.Indented));
             return null;
         }
 

@@ -20,6 +20,7 @@ using System.IO;
 using Capstone.Classes;
 using Capstone.Controllers;
 using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace Capstone.Classes
 {
@@ -57,10 +58,14 @@ namespace Capstone.Classes
         }
         public async Task Upload(HttpContextBase httpContextBase, string path, string saveName)
         {
+            // This whole process is returning a strange exception that doesn't seem to actually be doing anything.
+            // File is uploaded properly without corruption and application continues normally.
+            // Exception thrown: 'System.InvalidOperationException' in mscorlib.dll
+
             string token = await GetAccessToken(httpContextBase);
             if (string.IsNullOrEmpty(token))
                 return;
-            
+
             GraphServiceClient client = new GraphServiceClient(
                 new DelegateAuthenticationProvider(
                     (requestMessage) =>
@@ -70,20 +75,12 @@ namespace Capstone.Classes
 
                         return Task.FromResult(0);
                     }));
-
-            //convert file into byte array
+            
             byte[] data = System.IO.File.ReadAllBytes(path);
-            //convert byte array into writable stream
+            // Writeable stream from byte array for drive upload
             Stream stream = new MemoryStream(data);
-
-            //Get all items in drive
-            var driveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
-
-            // for updating existing file, specify file you want to update using Items[itemid]
-            //await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().PutAsync<DriveItem>(stream);
-
-            // For uploading new file, specify file name is necessary with ItemWithPath(filename)
-            await client.Me.Drive.Root.ItemWithPath(saveName).Content.Request().PutAsync<DriveItem>(stream);
+            
+            await client.Me.Drive.Root.ItemWithPath("/replace_me/" + saveName).Content.Request().PutAsync<DriveItem>(stream);
         }
 
 
