@@ -1,7 +1,9 @@
 ﻿using Capstone.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.OleDb;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 
@@ -20,7 +22,7 @@ namespace Capstone.Classes
             OleDbConnection connection = GetConnection();
             connection.Open();
             OleDbDataReader reader = null;
-            OleDbCommand command = new OleDbCommand("SELECT * FROM  History ORDER BY GenDate", connection);
+            OleDbCommand command = new OleDbCommand("SELECT * FROM  History ORDER BY genDate", connection);
             reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -37,6 +39,23 @@ namespace Capstone.Classes
             }
             connection.Close();
             return historyList;
+        }
+        public void NewHistoryEntry(string file, string exam, string calendarURL, string user)
+        {
+            OleDbConnection connection = GetConnection();
+            OleDbCommand command = new OleDbCommand("INSERT INTO History([FileName], [ExamFileName], [CalendarURL], [GenDate], [User]) VALUES (@file,@exam,@calURL,@genDate,@user)", connection);
+            command.Parameters.AddWithValue("@file", file);
+            command.Parameters.AddWithValue("@exam", exam);
+            command.Parameters.AddWithValue("@calURL", calendarURL);
+            command.Parameters.AddWithValue("@genDate", DateTime.Now.ToString());
+            command.Parameters.AddWithValue("@user", user);
+            try
+            {
+                connection.Open();
+                command.ExecuteNonQuery();
+            }
+            catch(Exception e){ }
+            connection.Close();
         }
     }
 }

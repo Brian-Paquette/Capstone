@@ -46,7 +46,7 @@ namespace Capstone.Controllers
                     return RedirectToAction("SignOut");
                 }
 
-                ViewBag.UserName = userName;
+                Session["USER"] = userName;
             }
             return View();
         }
@@ -152,6 +152,8 @@ namespace Capstone.Controllers
                     tokenCache.Clear();
                 }
             }
+
+            Session["USER"] = null;
             // Send an OpenID Connect sign-out request. 
             HttpContext.GetOwinContext().Authentication.SignOut(
                 CookieAuthenticationDefaults.AuthenticationType);

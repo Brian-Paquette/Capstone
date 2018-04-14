@@ -10,6 +10,7 @@ using System.Data;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using Capstone.Classes.GeneratorClasses;
+using Capstone.Classes;
 
 namespace Capstone.Controllers
 {
@@ -99,6 +100,9 @@ namespace Capstone.Controllers
             sheetAdapter.Fill(sheetData);
             conn.Close();
             DataSet examSchedule = GenerateExamSchedule(sheetData);
+
+            DBManager db = new DBManager();
+            db.NewHistoryEntry(sheetFile.FileName, "Exam_"+ sheetFile.FileName, "TODO", Session["USER"].ToString());
         }
 
         public DataSet GenerateExamSchedule(DataSet classData)
