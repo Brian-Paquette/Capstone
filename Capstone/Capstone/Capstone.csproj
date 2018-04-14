@@ -409,6 +409,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Classes\DBManager.cs" />
     <Compile Include="Classes\GeneratorClasses\Exam.cs" />
+    <Compile Include="Classes\APIManager.cs" />
     <Compile Include="Controllers\ClaimsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ScheduleController.cs" />

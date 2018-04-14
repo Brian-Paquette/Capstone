@@ -103,6 +103,9 @@ namespace Capstone.Controllers
 
             DBManager db = new DBManager();
             db.NewHistoryEntry(sheetFile.FileName, "Exam_"+ sheetFile.FileName, "TODO", Session["USER"].ToString());
+
+            APIManager drive = new APIManager();
+            drive.Upload(HttpContext, path, sheetFile.FileName).Wait();
         }
 
         public DataSet GenerateExamSchedule(DataSet classData)
