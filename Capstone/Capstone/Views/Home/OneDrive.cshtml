@@ -1,0 +1,51 @@
+﻿@model IEnumerable<Microsoft.Graph.DriveItem>
+
+@{
+
+    ViewBag.Title = "OneDrive";
+}
+
+<h2>@ViewBag.message</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            Name
+        </th>
+        <th>
+            Weburl
+        </th>
+        <th>
+            content
+        </th>
+        <th>
+            content
+        </th>
+    </tr>
+
+
+
+    <tr>
+        <td></td>
+        <td></td>
+        <td>
+            <label id="btnDownload" class="full-width btn btn-default buffer-bottom">
+                <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                <span class="btn-label pull-left">DOWNLOAD TEST FILE!</span>
+                <input type="button" style="display: none;" onclick="location.href='@Url.Action("OneDriveDownload", "Home")'">
+            </label>
+        </td>
+        <td>
+            <label id="btnUpload" class="full-width btn btn-default buffer-bottom">
+                <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                <span class="btn-label pull-left">Upload TEST FILE!</span>
+                <input type="button" style="display: none;" onclick="location.href='@Url.Action("OneDriveUpload", "Home")'">
+            </label>
+        </td>
+
+
+    </tr>
+
+
+
+</table>

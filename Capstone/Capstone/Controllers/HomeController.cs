@@ -16,6 +16,8 @@ using System.Net.Http.Headers;
 using System.Data.OleDb;
 using Capstone.Models;
 using System.Globalization;
+using System.IO;
+using Capstone.Classes;
 
 namespace Capstone.Controllers
 {
@@ -199,32 +201,169 @@ namespace Capstone.Controllers
         {
             if (Request.IsAuthenticated)
             {
-                List<History> historyList = new List<History>();
-                OleDbConnection connection = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\Alex\Desktop\Capstone\CapstoneDatabase.accdb");
-                connection.Open();
-                OleDbDataReader reader = null;
-                OleDbCommand command = new OleDbCommand("SELECT * from  History", connection);
-                reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    History h = new History();
-
-                    h.FileName = reader["FileName"].ToString();
-                    h.ExamFileName = reader["ExamFileName"].ToString();
-                    h.CalendarURL = reader["CalendarURL"].ToString();
-                    string test = reader["GenDate"].ToString();
-                    h.GenDate = DateTime.Parse(reader["GenDate"].ToString());
-                    h.User = reader["User"].ToString();
-
-                    historyList.Add(h);
-                }
-
-                connection.Close();
-                ViewBag.HistoryList = historyList;
+                DBManager db = new DBManager();
+                ViewBag.HistoryList = db.GetHistoryList();
                 return View();
-              
             }
             else { return RedirectToAction("SignOut", "Home", null); }
+        }
+        public async Task<ActionResult> OneDrive()
+        {
+            string token = await GetAccessToken();
+            if (string.IsNullOrEmpty(token))
+            {
+                // If there's no token in the session, redirect to Home
+                return Redirect("/");
+            }
+
+            GraphServiceClient client = new GraphServiceClient(
+                new DelegateAuthenticationProvider(
+                    (requestMessage) =>
+                    {
+                        requestMessage.Headers.Authorization =
+                            new AuthenticationHeaderValue("Bearer", token);
+
+                        return Task.FromResult(0);
+                    }));
+
+            try
+            {
+
+                var DriveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
+                Stream stream = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().GetAsync();
+                string var = client.BaseUrl;
+
+                ViewBag.message = var;
+                return View(DriveItem);
+            }
+            catch (ServiceException ex)
+            {
+                return RedirectToAction("Error", "Home", new { message = "ERROR retrieving messages", debug = ex.Message });
+            }
+        }
+
+
+        public async Task<ActionResult> OneDriveUpload()
+        {
+            string token = await GetAccessToken();
+            if (string.IsNullOrEmpty(token))
+            {
+                // If there's no token in the session, redirect to Home
+                return Redirect("/");
+            }
+
+            GraphServiceClient client = new GraphServiceClient(
+                new DelegateAuthenticationProvider(
+                    (requestMessage) =>
+                    {
+                        requestMessage.Headers.Authorization =
+                            new AuthenticationHeaderValue("Bearer", token);
+
+                        return Task.FromResult(0);
+                    }));
+
+
+            try
+            {
+                //get file you want to upload
+                string path = @"C:/Users/b_paquette/Desktop/testUpload.xlsx";
+                //convert file into byte array
+                byte[] data = System.IO.File.ReadAllBytes(path);
+                //convert byte array into writable stream
+                Stream stream = new MemoryStream(data);
+
+                //Get all items in drive
+                var driveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
+
+                // for updating existing file, specify file you want to update using Items[itemid]
+                await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().PutAsync<DriveItem>(stream);
+
+                // For uploading new file, specify file name is necessary with ItemWithPath(filename)
+                await client.Me.Drive.Root.ItemWithPath("newUpload.xlsx").Content.Request().PutAsync<DriveItem>(stream);
+
+
+
+                return View("Index");
+            }
+            catch (ServiceException ex)
+            {
+                return RedirectToAction("Error", "Home", new { message = "ERROR retrieving messages", debug = ex.Message });
+            }
+        }
+
+
+        // call this to download the file
+        public async Task<ActionResult> OneDriveDownload()
+        {
+            string token = await GetAccessToken();
+            if (string.IsNullOrEmpty(token))
+            {
+                // If there's no token in the session, redirect to Home
+                return Redirect("/");
+            }
+
+            GraphServiceClient client = new GraphServiceClient(
+                new DelegateAuthenticationProvider(
+                    (requestMessage) =>
+                    {
+                        requestMessage.Headers.Authorization =
+                            new AuthenticationHeaderValue("Bearer", token);
+
+                        return Task.FromResult(0);
+                    }));
+
+            try
+            {
+
+                var DriveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
+                //Get specific item based on itemID using items[itemid], use .content to get stream (byte data)
+                Stream stream = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().GetAsync();
+                //path where you want to download
+                string path = @"C:/Users/b_paquette/Desktop/test.xlsx";
+                if (!System.IO.File.Exists(path))
+                {
+                    // create filestream for writing data
+                    FileStream fs = System.IO.File.Create(path, (int)stream.Length);
+                    byte[] bytesInStream = new byte[stream.Length];
+                    stream.Read(bytesInStream, 0, bytesInStream.Length);
+                    fs.Write(bytesInStream, 0, bytesInStream.Length);
+                    fs.Close();
+                    fs.Dispose();
+                    stream.Close();
+                    stream.Dispose();
+                    ViewBag.error = "File created!";
+                    return View("Index");
+                }
+                else
+                {
+                    System.IO.File.Delete(path);
+                    FileStream fs = System.IO.File.Create(path, (int)stream.Length);
+                    byte[] bytesInStream = new byte[stream.Length];
+                    stream.Read(bytesInStream, 0, bytesInStream.Length);
+                    fs.Write(bytesInStream, 0, bytesInStream.Length);
+                    fs.Close();
+                    fs.Dispose();
+                    stream.Close();
+                    stream.Dispose();
+
+                    ViewBag.error = "File replaced!";
+                    return View("Index");
+                }
+
+            }
+            catch (ServiceException ex)
+            {
+                return RedirectToAction("Error", "Home", new { message = "ERROR retrieving messages", debug = ex.Message });
+            }
+        }
+        private static void CopyStream(Stream input, Stream output)
+        {
+            byte[] buffer = new byte[8 * 1024];
+            int len;
+            while ((len = input.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                output.Write(buffer, 0, len);
+            }
         }
     }
 }

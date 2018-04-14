@@ -407,6 +407,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Classes\DBManager.cs" />
     <Compile Include="Classes\GeneratorClasses\Exam.cs" />
     <Compile Include="Controllers\ClaimsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -461,12 +462,12 @@
     <Content Include="Views\Home\Calendar.cshtml" />
     <Content Include="Views\Home\Preferences.cshtml" />
     <Content Include="Views\Home\History.cshtml" />
+    <Content Include="Views\Home\OneDrive.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Content\sheetStorage\" />
     <Folder Include="System\IdentityModel\Tokens\" />
-    <Folder Include="Views\Schedule\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
