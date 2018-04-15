@@ -109,7 +109,7 @@ namespace Capstone.Classes
                     }));
 
             //Get all items in drive
-            IDriveItemChildrenCollectionPage items = await client.Me.Drive.Root.Children.Request().GetAsync();
+            IDriveItemChildrenCollectionPage items = await client.Me.Drive.Root.ItemWithPath("/PROGRAM SCHEDULES/").Children.Request().GetAsync();
             return items;
         }
         

@@ -332,7 +332,6 @@ namespace Capstone.Controllers
                     }
                 }
             }
-            Debug.WriteLine(JsonConvert.SerializeObject(availableRooms, Formatting.Indented));
 
             Object[] output = {exams, unassigned, availableRooms};
             if (unassigned.Count != 0)
