@@ -56,7 +56,7 @@ namespace Capstone.Classes
             }
             return token;
         }
-        public async Task Upload(HttpContextBase httpContextBase, string path, string saveName)
+        public async Task UploadSheet(HttpContextBase httpContextBase, string path, string saveName)
         {
             // This whole process is returning a strange exception that doesn't seem to actually be doing anything.
             // File is uploaded properly without corruption and application continues normally.
@@ -83,9 +83,34 @@ namespace Capstone.Classes
             await client.Me.Drive.Root.ItemWithPath("/replace_me/" + saveName).Content.Request().PutAsync<DriveItem>(stream);
         }
 
+        public async Task<IDriveItemChildrenCollectionPage> GetDriveItems(HttpContextBase httpContextBase)
+        {
+            // This whole process is returning a strange exception that doesn't seem to actually be doing anything.
+            // File is uploaded properly without corruption and application continues normally.
+            // Exception thrown: 'System.InvalidOperationException' in mscorlib.dll
+
+            string token = await GetAccessToken(httpContextBase);
+            if (string.IsNullOrEmpty(token))
+                return null;
+
+            GraphServiceClient client = new GraphServiceClient(
+                new DelegateAuthenticationProvider(
+                    (requestMessage) =>
+                    {
+                        requestMessage.Headers.Authorization =
+                            new AuthenticationHeaderValue("Bearer", token);
+
+                        return Task.FromResult(0);
+                    }));
+
+            //Get all items in drive
+            IDriveItemChildrenCollectionPage items = await client.Me.Drive.Root.Children.Request().GetAsync();
+            return items;
+        }
+
 
         // call this to download the file
-        public async Task Download(HttpContextBase httpContextBase)
+        public async Task DownloadSheet(HttpContextBase httpContextBase)
         {
             string token = await GetAccessToken(httpContextBase);
             if (string.IsNullOrEmpty(token))

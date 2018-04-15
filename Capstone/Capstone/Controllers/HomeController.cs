@@ -18,6 +18,8 @@ using Capstone.Models;
 using System.Globalization;
 using System.IO;
 using Capstone.Classes;
+using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace Capstone.Controllers
 {
@@ -174,6 +176,21 @@ namespace Capstone.Controllers
             {
                 DBManager db = new DBManager();
                 ViewBag.HistoryList = db.GetHistoryList();
+                return View();
+            }
+            else { return RedirectToAction("SignOut", "Home", null); }
+        }
+        public ActionResult DriveSelect()
+        {
+            if (Request.IsAuthenticated)
+            {
+                APIManager drive = new APIManager();
+                
+                var driveItems = Task.Run(async () => { await drive.GetDriveItems(HttpContext);});
+                driveItems.Wait();
+
+                Debug.WriteLine(JsonConvert.SerializeObject(driveItems, Formatting.Indented));
+
                 return View();
             }
             else { return RedirectToAction("SignOut", "Home", null); }

@@ -50,7 +50,7 @@ namespace Capstone.Controllers
             return RedirectToAction("Index", "Home", null);
         }
         [HttpPost]
-        public ActionResult ImportExcelFromCloud(HttpPostedFileBase sheetFile)
+        public ActionResult ImportExcelFromDrive(HttpPostedFileBase sheetFile)
         {
             if (sheetFile == null || sheetFile.ContentLength == 0)
             {
@@ -105,7 +105,7 @@ namespace Capstone.Controllers
             db.NewHistoryEntry(sheetFile.FileName, "Exam_"+ sheetFile.FileName, "TODO", Session["USER"].ToString());
 
             APIManager drive = new APIManager();
-            drive.Upload(HttpContext, path, sheetFile.FileName).Start();
+            drive.UploadSheet(HttpContext, path, sheetFile.FileName).Start();
         }
 
         public DataSet GenerateExamSchedule(DataSet classData)

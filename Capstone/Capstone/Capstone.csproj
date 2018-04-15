@@ -463,7 +463,7 @@
     <Content Include="Views\Home\Calendar.cshtml" />
     <Content Include="Views\Home\Preferences.cshtml" />
     <Content Include="Views\Home\History.cshtml" />
-    <Content Include="Views\Home\OneDrive.cshtml" />
+    <Content Include="Views\Home\DriveSelect.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
