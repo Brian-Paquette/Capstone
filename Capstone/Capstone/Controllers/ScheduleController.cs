@@ -325,8 +325,8 @@ namespace Capstone.Controllers
                             Exam availableRoom = new Exam();
                             availableRoom.Room = room;
                             availableRoom.Day = weekday;
-                            availableRoom.Start = string.Format("{0:hh:mm tt}", time);
-                            availableRoom.End = string.Format("{0:hh:mm tt}", rooms[weekday][time][room]);
+                            availableRoom.Start = string.Format("{0:hh:mm tt}", Convert.ToDateTime(time));
+                            availableRoom.End = string.Format("{0:hh:mm tt}", Convert.ToDateTime(rooms[weekday][time][room]));
                             availableRooms.Add(availableRoom);
                         }
                     }
@@ -359,7 +359,7 @@ namespace Capstone.Controllers
                 sheet.Cells("A" + row + ":I" + row).Style.Fill.SetBackgroundColor(XLColor.Crimson);
                 sheet.Row(row).Style.Font.SetFontColor(XLColor.White);
 
-                sheet.Cell("A" + row).Value = "There weren't enough rooms available to fit these exams. Adding additional programs to your original sheet may fix this issue.";
+                sheet.Cell("A" + row).Value = "There weren't enough rooms available to fit these exams.";
 
                 row++;
                 sheet.Cells("A" + row + ":I" + row).Style.Fill.SetBackgroundColor(XLColor.Crimson);
