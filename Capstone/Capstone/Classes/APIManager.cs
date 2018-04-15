@@ -56,7 +56,7 @@ namespace Capstone.Classes
             }
             return token;
         }
-        public async Task<string> UploadSheet(HttpContextBase httpContextBase, string path, string saveName)
+        public async Task<string> UploadSheet(HttpContextBase httpContextBase, string path, string saveName, bool examSheet = false)
         {
             // This whole process is returning a strange exception that doesn't seem to actually be doing anything.
             // File is uploaded properly without corruption and application continues normally.
@@ -80,7 +80,11 @@ namespace Capstone.Classes
             // Writeable stream from byte array for drive upload
             Stream stream = new MemoryStream(data);
 
-            Microsoft.Graph.DriveItem file = client.Me.Drive.Root.ItemWithPath("/replace_me/" + saveName).Content.Request().PutAsync<DriveItem>(stream).Result;
+            string dir = "PROGRAM SCHEDULES";
+            if (examSheet)
+                dir = "/EXAM SCHEDULES/";
+
+            Microsoft.Graph.DriveItem file = client.Me.Drive.Root.ItemWithPath(dir + saveName).Content.Request().PutAsync<DriveItem>(stream).Result;
             return file.WebUrl;
         }
 

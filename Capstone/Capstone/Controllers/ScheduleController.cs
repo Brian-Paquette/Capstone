@@ -94,7 +94,13 @@ namespace Capstone.Controllers
             try
             {
                 List<Exam> examSchedule = GenerateExamSchedule(sheetData);
-                SaveExamSheet(examSchedule);
+                SaveExamSheet(examSchedule, null, fileName);
+
+                APIManager drive = new APIManager();
+                path = Server.MapPath("~/App_Data/sheetStorage/Exam_" + fileName);
+                string examURL = Task.Run(() => drive.UploadSheet(HttpContext, path, "Exam_" + fileName, true)).Result;
+                System.IO.File.Delete(path);
+
             } catch(Exception e)
             {
                 TempData["ERROR"] = "The provided file was incompatible. It may be missing required value columns. Please refer to the template sheet for comparison!";
@@ -283,14 +289,45 @@ namespace Capstone.Controllers
             //Debug.WriteLine(JsonConvert.SerializeObject(classes, Formatting.Indented));
             return exams;
         }
-        public void SaveExamSheet(List<Exam> exams, string fileName)
+        public void SaveExamSheet(List<Exam> exams, List<Exam> incompletes, string fileName)
         {
             XLWorkbook doc = new XLWorkbook();
             IXLWorksheet sheet = doc.Worksheets.Add("Exam Schedule");
+            
+            int row = 1;
+            sheet.Cells("A1:I1").Style.Fill.SetBackgroundColor(XLColor.Charcoal);
+            sheet.Row(row).Style.Font.SetFontColor(XLColor.White);
+            sheet.Row(row).Style.Font.SetBold();
 
-            sheet.Cell("A1").Value = "Hello World!";
+            sheet.Column("A").Width = 15;
+            sheet.Column("B").Width = 60;
+            sheet.Column("C").Width = 10;
+            sheet.Columns("D:I").Width = 20;
 
-            doc.SaveAs(Server.MapPath("~/App_Data/sheetStorage/" + fileName));
+            sheet.Cell("A" + row).Value = "Code";
+            sheet.Cell("B" + row).Value = "Course Name";
+            sheet.Cell("C" + row).Value = "Section";
+            sheet.Cell("D" + row).Value = "Faculty";
+            sheet.Cell("E" + row).Value = "Proctor";
+            sheet.Cell("F" + row).Value = "Room";
+            sheet.Cell("G" + row).Value = "Day";
+            sheet.Cell("H" + row).Value = "Time";
+            sheet.Cell("I" + row).Value = "Duration";
+            foreach(Exam exam in exams)
+            {
+                row++;
+                sheet.Cell("A" + row).Value = exam.Code;
+                sheet.Cell("B" + row).Value = exam.Name;
+                sheet.Cell("C" + row).Value = exam.Section;
+                sheet.Cell("D" + row).Value = exam.Faculty;
+                sheet.Cell("E" + row).Value = exam.Proctor;
+                sheet.Cell("F" + row).Value = exam.Room;
+                sheet.Cell("G" + row).Value = exam.Day;
+                sheet.Cell("H" + row).Value = exam.Start + " - " +  exam.End;
+                sheet.Cell("I" + row).Value = exam.Duration;
+            }
+
+            doc.SaveAs(Server.MapPath("~/App_Data/sheetStorage/Exam_" + fileName));
         }
         public bool DownloadFileFromPath(string path)
         {
