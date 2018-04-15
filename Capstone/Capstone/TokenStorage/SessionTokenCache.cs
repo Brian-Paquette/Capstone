@@ -14,6 +14,7 @@ namespace Capstone.TokenStorage
         HttpContextBase httpContext = null;
 
         TokenCache tokenCache = new TokenCache();
+        private HttpContext context;
 
         public SessionTokenCache(string userId, HttpContextBase httpContext)
         {
@@ -21,6 +22,12 @@ namespace Capstone.TokenStorage
             cacheId = userId + "_TokenCache";
             this.httpContext = httpContext;
             Load();
+        }
+
+        public SessionTokenCache(string userId, HttpContext context)
+        {
+            this.userId = userId;
+            this.context = context;
         }
 
         public TokenCache GetMsalCacheInstance()

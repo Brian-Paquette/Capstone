@@ -13,6 +13,13 @@ using Microsoft.Identity.Client;
 using Capstone.TokenStorage;
 using Microsoft.Graph;
 using System.Net.Http.Headers;
+using System.Data.OleDb;
+using Capstone.Models;
+using System.Globalization;
+using System.IO;
+using Capstone.Classes;
+using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace Capstone.Controllers
 {
@@ -22,7 +29,6 @@ namespace Capstone.Controllers
         {
             if (Request.IsAuthenticated)
             {
-                
                 string userId = ClaimsPrincipal.Current.FindFirst(ClaimTypes.NameIdentifier).Value;
                 string userName = ClaimsPrincipal.Current.FindFirst(ClaimTypes.Email).Value;
                 if (string.IsNullOrEmpty(userId))
@@ -42,30 +48,31 @@ namespace Capstone.Controllers
                     return RedirectToAction("SignOut");
                 }
 
-                ViewBag.UserName = userName;
+                Session["USER"] = userName;
             }
             return View();
         }
 
         public async Task<ActionResult> Inbox()
         {
-            string token = await GetAccessToken();
-            if (string.IsNullOrEmpty(token))
+            if (Request.IsAuthenticated)
             {
-                // If there's no token in the session, redirect to Home
-                return Redirect("/");
-            }
+                APIManager api = new APIManager(Session["USER"].ToString());
+                string token = await api.GetAccessToken(HttpContext);
+                if (string.IsNullOrEmpty(token))
+                {
+                    // If there's no token in the session, redirect to Home
+                    return Redirect("/");
+                }
 
-            GraphServiceClient client = new GraphServiceClient(
-                new DelegateAuthenticationProvider(
-                    (requestMessage) =>
-                    {
-                        requestMessage.Headers.Authorization =
-                            new AuthenticationHeaderValue("Bearer", token);
+                GraphServiceClient client = new GraphServiceClient(
+                    new DelegateAuthenticationProvider(
+                        (requestMessage) =>
+                        {
+                            requestMessage.Headers.Authorization =
+                                new AuthenticationHeaderValue("Bearer", token);
 
-                        return Task.FromResult(0);
-                    }));
-
+<<<<<<< HEAD
             try
             {
                 var mailResults = await client.Me.MailFolders.Inbox.Messages.Request()
@@ -79,7 +86,26 @@ namespace Capstone.Controllers
             catch (ServiceException ex)
             {
                 return RedirectToAction("Error", "Home", new { message = "ERROR retrieving messages", debug = ex.Message });
+=======
+                            return Task.FromResult(0);
+                        }));
+                try
+                {
+                    var mailResults = await client.Me.MailFolders.Inbox.Messages.Request()
+                                        .OrderBy("receivedDateTime DESC")
+                                        .Select("subject,receivedDateTime,from")
+                                        .Top(10)
+                                        .GetAsync();
+
+                    return View(mailResults.CurrentPage);
+                }
+                catch (ServiceException ex)
+                {
+                    return RedirectToAction("Error", "Home", new { message = "ERROR retrieving messages", debug = ex.Message });
+                }
+>>>>>>> application-phase-2
             }
+            else { return RedirectToAction("SignOut", "Home", null); }
         }
 
         public async Task<ActionResult> OneDriveUpload()
@@ -116,37 +142,42 @@ namespace Capstone.Controllers
 
         public async Task<ActionResult> Calendar()
         {
-            string token = await GetAccessToken();
-            if (string.IsNullOrEmpty(token))
+            if (Request.IsAuthenticated)
             {
-                // If there's no token in the session, redirect to Home
-                return Redirect("/");
+                APIManager api = new APIManager(Session["USER"].ToString());
+                string token = await api.GetAccessToken(HttpContext);
+                if (string.IsNullOrEmpty(token))
+                {
+                    // If there's no token in the session, redirect to Home
+                    return Redirect("/");
+                }
+
+                GraphServiceClient client = new GraphServiceClient(
+                    new DelegateAuthenticationProvider(
+                        (requestMessage) =>
+                        {
+                            requestMessage.Headers.Authorization =
+                                new AuthenticationHeaderValue("Bearer", token);
+
+                            return Task.FromResult(0);
+                        }));
+
+                try
+                {
+                    var eventResults = await client.Me.Events.Request()
+                                        .OrderBy("start/dateTime DESC")
+                                        .Select("subject,start,end")
+                                        .Top(10)
+                                        .GetAsync();
+
+                    return View(eventResults.CurrentPage);
+                }
+                catch (ServiceException ex)
+                {
+                    return RedirectToAction("Error", "Home", new { message = "ERROR retrieving events", debug = ex.Message });
+                }
             }
-
-            GraphServiceClient client = new GraphServiceClient(
-                new DelegateAuthenticationProvider(
-                    (requestMessage) =>
-                    {
-                        requestMessage.Headers.Authorization =
-                            new AuthenticationHeaderValue("Bearer", token);
-
-                        return Task.FromResult(0);
-                    }));
-
-            try
-            {
-                var eventResults = await client.Me.Events.Request()
-                                    .OrderBy("start/dateTime DESC")
-                                    .Select("subject,start,end")
-                                    .Top(10)
-                                    .GetAsync();
-
-                return View(eventResults.CurrentPage);
-            }
-            catch (ServiceException ex)
-            {
-                return RedirectToAction("Error", "Home", new { message = "ERROR retrieving events", debug = ex.Message });
-            }
+<<<<<<< HEAD
         }
 
 
@@ -163,6 +194,9 @@ namespace Capstone.Controllers
             ViewBag.Message = "";
 
             return View();
+=======
+            else { return RedirectToAction("SignOut", "Home", null); }
+>>>>>>> application-phase-2
         }
         
         public void SignIn()
@@ -188,42 +222,72 @@ namespace Capstone.Controllers
                     tokenCache.Clear();
                 }
             }
+
+            Session["USER"] = null;
             // Send an OpenID Connect sign-out request. 
             HttpContext.GetOwinContext().Authentication.SignOut(
                 CookieAuthenticationDefaults.AuthenticationType);
             Response.Redirect("/");
         }
-        public async Task<string> GetAccessToken()
+        public ActionResult Preferences()
         {
-            string accessToken = null;
-
-            // Load the app config from web.config
-            string appId = ConfigurationManager.AppSettings["ida:AppId"];
-            string appPassword = ConfigurationManager.AppSettings["ida:AppPassword"];
-            string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
-            string[] scopes = ConfigurationManager.AppSettings["ida:AppScopes"]
-                .Replace(' ', ',').Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            // Get the current user's ID
-            string userId = ClaimsPrincipal.Current.FindFirst(ClaimTypes.NameIdentifier).Value;
-
-            if (!string.IsNullOrEmpty(userId))
+            if (Request.IsAuthenticated)
             {
-                // Get the user's token cache
-                SessionTokenCache tokenCache = new SessionTokenCache(userId, HttpContext);
+                string user = Session["USER"].ToString();
+                DBManager db = new DBManager();
 
-                ConfidentialClientApplication cca = new ConfidentialClientApplication(
-                    appId, redirectUri, new ClientCredential(appPassword), tokenCache.GetMsalCacheInstance(), null);
+                string uploadDir = db.GetUserUploadDirectory(user);
+                string examDir = db.GetUserExamDirectory(user);
+                string calGen = db.GetUserGenCalendars(user);
 
-                // Call AcquireTokenSilentAsync, which will return the cached
-                // access token if it has not expired. If it has expired, it will
-                // handle using the refresh token to get a new one.
-                AuthenticationResult result = await cca.AcquireTokenSilentAsync(scopes, cca.Users.FirstOrDefault());
+                ViewBag.uploadDir = uploadDir;
+                ViewBag.examDir = examDir;
+                ViewBag.calGen = calGen;
 
-                accessToken = result.AccessToken;
+                return View();
             }
+            else { return RedirectToAction("SignOut", "Home", null); }
+        }
+        [HttpPost]
+        public ActionResult SavePreferences(string uploadDir, string examDir, bool calGen = false)
+        {
+            if (Request.IsAuthenticated)
+            {
+                string user = Session["USER"].ToString();
+                DBManager db = new DBManager();
 
-            return accessToken;
+                Debug.WriteLine(calGen);
+                
+                db.SavePreferences(user, uploadDir, examDir, calGen.ToString());
+                return Redirect("/");
+            }
+            else { return RedirectToAction("SignOut", "Home", null); }
+        }
+        public ActionResult History()
+        {
+            if (Request.IsAuthenticated)
+            {
+                DBManager db = new DBManager();
+                ViewBag.HistoryList = db.GetHistoryList();
+                return View();
+            }
+            else { return RedirectToAction("SignOut", "Home", null); }
+        }
+        public ActionResult DriveSelect()
+        {
+            if (Request.IsAuthenticated)
+            {
+                APIManager drive = new APIManager(Session["USER"].ToString());
+                IDriveItemChildrenCollectionPage driveItems = Task.Run(() => drive.GetDriveItems(HttpContext)).Result;
+
+                DBManager db = new DBManager();
+                string dir = db.GetUserUploadDirectory(Session["USER"].ToString());
+
+                ViewBag.Dir = dir;
+                ViewBag.DriveList = driveItems;
+                return View();
+            }
+            else { return RedirectToAction("SignOut", "Home", null); }
         }
     }
 }
