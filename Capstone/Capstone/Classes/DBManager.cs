@@ -33,7 +33,6 @@ namespace Capstone.Classes
                 h.ExamFileName = reader["ExamFileName"].ToString();
                 h.ExamURL = reader["ExamURL"].ToString();
                 h.CalendarURL = reader["CalendarURL"].ToString();
-                string test = reader["GenDate"].ToString();
                 h.GenDate = DateTime.Parse(reader["GenDate"].ToString());
                 h.User = reader["User"].ToString();
 

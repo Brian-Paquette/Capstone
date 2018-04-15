@@ -95,8 +95,8 @@ namespace Capstone.Controllers
             string examURL = "";
             try
             {
-                List<Exam> examSchedule = GenerateExamSchedule(sheetData);
-                SaveExamSheet(examSchedule, null, fileName);
+                Object[] examSchedule = GenerateExamSchedule(sheetData);
+                SaveExamSheet(examSchedule, fileName);
 
                 APIManager drive = new APIManager();
 
@@ -115,7 +115,7 @@ namespace Capstone.Controllers
             db.NewHistoryEntry(fileName, fileURL, "Exam_"+ fileName, examURL, "TODO", Session["USER"].ToString());
         }
 
-        public List<Exam> GenerateExamSchedule(DataSet classData)
+        public Object[] GenerateExamSchedule(DataSet classData)
         {
             // Data Ref Points
             // Indexing ensures that any sheet will function appropriately even if the headers aren't exact, so long as
@@ -289,24 +289,124 @@ namespace Capstone.Controllers
                     }
                 }
             }
-            Debug.WriteLine(JsonConvert.SerializeObject(exams, Formatting.Indented));
-            //Debug.WriteLine(JsonConvert.SerializeObject(classes, Formatting.Indented));
-            return exams;
+            // Check for unassigned classes & send them to an unassigned list!
+            classKeys = new List<string>(classes.Keys);
+            List<Exam> unassigned = new List<Exam>();
+            foreach (string program in classKeys)
+            {
+                if (classes[program].Count == 0)
+                    continue;
+                List<string> sections = new List<string>(classes[program].Keys);
+                foreach (string section in sections)
+                {
+                    Exam un = new Exam();
+                    un.Code = program;
+                    un.Name = classes[program][section]["NAME"];
+                    un.Section = section;
+                    un.Faculty = classes[program][section]["FACULTY"];
+                    unassigned.Add(un);
+                }
+            }
+            // We don't need to list the rooms still available if we don't have unassigned classes.
+            List<Exam> availableRooms = new List<Exam>();
+            if (unassigned.Count != 0)
+            {
+                roomKeys = new List<string>(rooms.Keys);
+                foreach (string weekday in roomKeys)
+                {
+                    List<string> times = new List<string>(rooms[weekday].Keys);
+                    foreach (string time in times)
+                    {
+                        if (rooms[weekday][time].Count == 0)
+                            continue;
+                        List<string> roomNums = new List<string>(rooms[weekday][time].Keys);
+                        foreach (string room in roomNums)
+                        {
+                            Exam availableRoom = new Exam();
+                            availableRoom.Room = room;
+                            availableRoom.Day = weekday;
+                            availableRoom.Start = string.Format("{0:hh:mm tt}", time);
+                            availableRoom.End = string.Format("{0:hh:mm tt}", rooms[weekday][time][room]);
+                            availableRooms.Add(availableRoom);
+                        }
+                    }
+                }
+            }
+            Debug.WriteLine(JsonConvert.SerializeObject(availableRooms, Formatting.Indented));
+
+            Object[] output = {exams, unassigned, availableRooms};
+            if (unassigned.Count != 0)
+                return output;
+            return output;
         }
-        public void SaveExamSheet(List<Exam> exams, List<Exam> incompletes, string fileName)
+        public void SaveExamSheet(Object[] examGeneration, string fileName)
         {
+            List<Exam> exams = (List<Exam>)examGeneration[0];
+            List<Exam> unassigned = (List<Exam>)examGeneration[1];
+            List<Exam> availableRooms = (List<Exam>)examGeneration[2];
+
             XLWorkbook doc = new XLWorkbook();
             IXLWorksheet sheet = doc.Worksheets.Add("Exam Schedule");
-            
-            int row = 1;
-            sheet.Cells("A1:I1").Style.Fill.SetBackgroundColor(XLColor.Charcoal);
-            sheet.Row(row).Style.Font.SetFontColor(XLColor.White);
-            sheet.Row(row).Style.Font.SetBold();
 
             sheet.Column("A").Width = 15;
             sheet.Column("B").Width = 60;
             sheet.Column("C").Width = 10;
             sheet.Columns("D:I").Width = 20;
+
+            int row = 1;
+            if(unassigned.Count != 0)
+            {
+                sheet.Cells("A" + row + ":I" + row).Style.Fill.SetBackgroundColor(XLColor.Crimson);
+                sheet.Row(row).Style.Font.SetFontColor(XLColor.White);
+
+                sheet.Cell("A" + row).Value = "There weren't enough rooms available to fit these exams. Adding additional programs to your original sheet may fix this issue.";
+
+                row++;
+                sheet.Cells("A" + row + ":I" + row).Style.Fill.SetBackgroundColor(XLColor.Crimson);
+                sheet.Row(row).Style.Font.SetFontColor(XLColor.White);
+                sheet.Row(row).Style.Font.SetBold();
+
+                sheet.Cell("A" + row).Value = "Code";
+                sheet.Cell("B" + row).Value = "Course Name";
+                sheet.Cell("C" + row).Value = "Section";
+                sheet.Cell("D" + row).Value = "Faculty";
+                foreach (Exam datarow in unassigned)
+                {
+                    row++;
+                    sheet.Cell("A" + row).Value = datarow.Code;
+                    sheet.Cell("B" + row).Value = datarow.Name;
+                    sheet.Cell("C" + row).Value = datarow.Section;
+                    sheet.Cell("D" + row).Value = datarow.Faculty;
+                }
+                row++;
+                sheet.Cells("A" + row + ":I" + row).Style.Fill.SetBackgroundColor(XLColor.Crimson);
+                sheet.Row(row).Style.Font.SetFontColor(XLColor.White);
+
+                sheet.Cell("A" + row).Value = "Here's a list of available rooms.";
+
+                row++;
+                sheet.Cells("A" + row + ":I" + row).Style.Fill.SetBackgroundColor(XLColor.Crimson);
+                sheet.Row(row).Style.Font.SetFontColor(XLColor.White);
+                sheet.Row(row).Style.Font.SetBold();
+
+                sheet.Cell("D" + row).Value = "Faculty";
+                sheet.Cell("F" + row).Value = "Room";
+                sheet.Cell("G" + row).Value = "Day";
+                sheet.Cell("H" + row).Value = "Time";
+                foreach (Exam datarow in availableRooms)
+                {
+                    row++;
+                    sheet.Cell("D" + row).Value = datarow.Faculty;
+                    sheet.Cell("F" + row).Value = datarow.Room;
+                    sheet.Cell("G" + row).Value = datarow.Day;
+                    sheet.Cell("H" + row).Value = datarow.Start + " - " + datarow.End;
+                }
+                row++;
+            }
+            
+            sheet.Cells("A" + row + ":I" + row).Style.Fill.SetBackgroundColor(XLColor.Charcoal);
+            sheet.Row(row).Style.Font.SetFontColor(XLColor.White);
+            sheet.Row(row).Style.Font.SetBold();
 
             sheet.Cell("A" + row).Value = "Code";
             sheet.Cell("B" + row).Value = "Course Name";
@@ -317,18 +417,18 @@ namespace Capstone.Controllers
             sheet.Cell("G" + row).Value = "Day";
             sheet.Cell("H" + row).Value = "Time";
             sheet.Cell("I" + row).Value = "Duration";
-            foreach(Exam exam in exams)
+            foreach (Exam datarow in exams)
             {
                 row++;
-                sheet.Cell("A" + row).Value = exam.Code;
-                sheet.Cell("B" + row).Value = exam.Name;
-                sheet.Cell("C" + row).Value = exam.Section;
-                sheet.Cell("D" + row).Value = exam.Faculty;
-                sheet.Cell("E" + row).Value = exam.Proctor;
-                sheet.Cell("F" + row).Value = exam.Room;
-                sheet.Cell("G" + row).Value = exam.Day;
-                sheet.Cell("H" + row).Value = exam.Start + " - " +  exam.End;
-                sheet.Cell("I" + row).Value = exam.Duration;
+                sheet.Cell("A" + row).Value = datarow.Code;
+                sheet.Cell("B" + row).Value = datarow.Name;
+                sheet.Cell("C" + row).Value = datarow.Section;
+                sheet.Cell("D" + row).Value = datarow.Faculty;
+                sheet.Cell("E" + row).Value = datarow.Proctor;
+                sheet.Cell("F" + row).Value = datarow.Room;
+                sheet.Cell("G" + row).Value = datarow.Day;
+                sheet.Cell("H" + row).Value = datarow.Start + " - " + datarow.End;
+                sheet.Cell("I" + row).Value = datarow.Duration;
             }
 
             doc.SaveAs(Server.MapPath("~/App_Data/sheetStorage/Exam_" + fileName));
