@@ -56,7 +56,7 @@ namespace Capstone.Classes
             }
             return token;
         }
-        public async Task<bool> UploadSheet(HttpContextBase httpContextBase, string path, string saveName)
+        public async Task<string> UploadSheet(HttpContextBase httpContextBase, string path, string saveName)
         {
             // This whole process is returning a strange exception that doesn't seem to actually be doing anything.
             // File is uploaded properly without corruption and application continues normally.
@@ -64,7 +64,7 @@ namespace Capstone.Classes
 
             string token = await GetAccessToken(httpContextBase);
             if (string.IsNullOrEmpty(token))
-                return false;
+                return null;
 
             GraphServiceClient client = new GraphServiceClient(
                 new DelegateAuthenticationProvider(
@@ -79,9 +79,9 @@ namespace Capstone.Classes
             byte[] data = System.IO.File.ReadAllBytes(path);
             // Writeable stream from byte array for drive upload
             Stream stream = new MemoryStream(data);
-            
-            await client.Me.Drive.Root.ItemWithPath("/replace_me/" + saveName).Content.Request().PutAsync<DriveItem>(stream);
-            return true;
+
+            Microsoft.Graph.DriveItem file = client.Me.Drive.Root.ItemWithPath("/replace_me/" + saveName).Content.Request().PutAsync<DriveItem>(stream).Result;
+            return file.WebUrl;
         }
 
         public async Task<IDriveItemChildrenCollectionPage> GetDriveItems(HttpContextBase httpContextBase)

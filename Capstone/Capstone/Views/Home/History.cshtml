@@ -20,8 +20,8 @@
                     @foreach (var history in ViewBag.HistoryList)
                     {
                     <tr>
-                        <td>@history.FileName</td>
-                        <td>@history.ExamFileName</td>
+                        <td><a target="_blank" href="@history.FileURL">@history.FileName</a></td>
+                        <td><a target="_blank" href="@history.ExamURL">@history.ExamFileName</a></td>
                         <td>@history.GenDate</td>
                         <td>@history.CalendarURL</td>
                         <td>@history.User</td>

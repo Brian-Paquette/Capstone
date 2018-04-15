@@ -19,13 +19,14 @@
                     {
                         if (item.File == null) { continue; }
                         <tr>
-                            <td><span class="glyphicon glyphicon-file faded" aria-hidden="true"></span> @item.Name</td>
+                            <td><span class="glyphicon glyphicon-file faded" aria-hidden="true"></span> <a target="_blank" href="@item.WebUrl">@item.Name</a></td>
                             <td class="faded">@Convert.ToDateTime(item.LastModifiedDateTime.ToString()).ToString("MM/dd/yyyy hh:mm tt")</td>
                             <td>
                                 @using (Html.BeginForm("ImportExcelFromDrive", "Schedule", FormMethod.Post, new { id = "sheetSelectFromFile", enctype = "multipart/form-data" }))
                                 {
                                     <input type="hidden" name="fileName" value="@item.Name"/>
                                     <input type="hidden" name="driveItemID" value="@item.Id" />
+                                    <input type="hidden" name="returnURL" value="@item.WebUrl" />
                                     <label class="btn btn-info pull-right" style="border:none;">
                                         <span>Generate Exam Schedule</span>
                                         <span class="glyphicon glyphicon-download" aria-hidden="true"></span>

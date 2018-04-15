@@ -41,9 +41,9 @@ namespace Capstone.Controllers
                     sheetFile.SaveAs(path);
 
                     APIManager drive = new APIManager();
-                    var task = Task.Run(() => drive.UploadSheet(HttpContext, path, sheetFile.FileName)).Result;
+                    string returnURL = Task.Run(() => drive.UploadSheet(HttpContext, path, sheetFile.FileName)).Result;
 
-                    ProcessSchedule(path, sheetFile.FileName);
+                    ProcessSchedule(path, sheetFile.FileName, returnURL);
                 }
                 catch (Exception e)
                 {
@@ -54,10 +54,10 @@ namespace Capstone.Controllers
             {
                 TempData["UploadError"] = "Please upload a valid file.";
             }
-            return RedirectToAction("Index", "Home", null);
+            return RedirectToAction("History", "Home", null);
         }
         [HttpPost]
-        public ActionResult ImportExcelFromDrive(string driveItemID, string fileName)
+        public ActionResult ImportExcelFromDrive(string driveItemID, string fileName, string returnURL)
         {
             string path = Server.MapPath("~/App_Data/sheetStorage/" + fileName);
             if (System.IO.File.Exists(path))
@@ -66,12 +66,12 @@ namespace Capstone.Controllers
             APIManager drive = new APIManager();
             var task = Task.Run(() => drive.DownloadSheet(HttpContext, driveItemID, path)).Result;
 
-            ProcessSchedule(path, fileName);
+            ProcessSchedule(path, fileName, returnURL);
 
-            return RedirectToAction("DriveSelect", "Home", null);
+            return RedirectToAction("History", "Home", null);
         }
 
-        public void ProcessSchedule(string path, string fileName)
+        public void ProcessSchedule(string path, string fileName, string fileURL)
         {
             // Connect to recently saved excel sheet
             OleDbConnection conn = null;
@@ -90,10 +90,17 @@ namespace Capstone.Controllers
             DataSet sheetData = new DataSet();
             sheetAdapter.Fill(sheetData);
             conn.Close();
-            DataSet examSchedule = GenerateExamSchedule(sheetData);
+            try
+            {
+                DataSet examSchedule = GenerateExamSchedule(sheetData);
+            } catch(Exception e)
+            {
+                TempData["ERROR"] = "The provided file was incompatible. It may be missing required value columns. Please refer to the template sheet for comparison!";
+            }
 
             DBManager db = new DBManager();
-            db.NewHistoryEntry(fileName, "Exam_"+ fileName, "TODO", Session["USER"].ToString());
+            db.NewHistoryEntry(fileName, fileURL, "Exam_"+ fileName, "examURL", "TODO", Session["USER"].ToString());
+            System.IO.File.Delete(path);
         }
 
         public DataSet GenerateExamSchedule(DataSet classData)

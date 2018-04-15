@@ -174,6 +174,11 @@ namespace Capstone.Controllers
         {
             if (Request.IsAuthenticated)
             {
+                APIManager drive = new APIManager();
+                IDriveItemChildrenCollectionPage driveItems = Task.Run(() => drive.GetDriveItems(HttpContext)).Result;
+
+                ViewBag.DriveList = driveItems;
+
                 DBManager db = new DBManager();
                 ViewBag.HistoryList = db.GetHistoryList();
                 return View();
