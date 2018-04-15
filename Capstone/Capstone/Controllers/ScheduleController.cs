@@ -33,10 +33,17 @@ namespace Capstone.Controllers
             if (sheetFile.FileName.EndsWith(".xls") || sheetFile.FileName.EndsWith(".xlsx"))
             {
                 TempData["UploadSuccess"] = "Upload successful!";
-                // Do processing
                 try
                 {
-                    ProcessSchedule(sheetFile);
+                    string path = Server.MapPath("~/App_Data/sheetStorage/" + sheetFile.FileName);
+                    if (System.IO.File.Exists(path))
+                        System.IO.File.Delete(path);
+                    sheetFile.SaveAs(path);
+
+                    APIManager drive = new APIManager();
+                    var task = Task.Run(() => drive.UploadSheet(HttpContext, path, sheetFile.FileName)).Result;
+
+                    ProcessSchedule(path, sheetFile.FileName);
                 }
                 catch (Exception e)
                 {
@@ -59,21 +66,18 @@ namespace Capstone.Controllers
             APIManager drive = new APIManager();
             var task = Task.Run(() => drive.DownloadSheet(HttpContext, driveItemID, path)).Result;
 
+            ProcessSchedule(path, fileName);
+
             return RedirectToAction("DriveSelect", "Home", null);
         }
 
-        public void ProcessSchedule(HttpPostedFileBase sheetFile)
+        public void ProcessSchedule(string path, string fileName)
         {
-            string path = Server.MapPath("~/App_Data/sheetStorage/" + sheetFile.FileName);
-            if (System.IO.File.Exists(path))
-                System.IO.File.Delete(path);
-            sheetFile.SaveAs(path);
-
             // Connect to recently saved excel sheet
             OleDbConnection conn = null;
-            if (sheetFile.FileName.EndsWith(".xls"))
+            if (fileName.EndsWith(".xls"))
                 conn = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0; data source=" + path + ";Extended Properties=\"Excel 8.0;HDR=1;IMEX=1\";");
-            if (sheetFile.FileName.EndsWith(".xlsx"))
+            if (fileName.EndsWith(".xlsx"))
                 conn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties=\"Excel 12.0 Xml;HDR=1;IMEX=1\";");
 
             conn.Open();
@@ -89,10 +93,7 @@ namespace Capstone.Controllers
             DataSet examSchedule = GenerateExamSchedule(sheetData);
 
             DBManager db = new DBManager();
-            db.NewHistoryEntry(sheetFile.FileName, "Exam_"+ sheetFile.FileName, "TODO", Session["USER"].ToString());
-
-            APIManager drive = new APIManager();
-            drive.UploadSheet(HttpContext, path, sheetFile.FileName).Start();
+            db.NewHistoryEntry(fileName, "Exam_"+ fileName, "TODO", Session["USER"].ToString());
         }
 
         public DataSet GenerateExamSchedule(DataSet classData)
