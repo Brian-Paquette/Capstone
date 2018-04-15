@@ -1420,3 +1420,12 @@ C:\Users\Alex\Desktop\Capstone\Capstone\Capstone\obj\Debug\Capstone.csproj.CoreC
 C:\Users\Alex\Desktop\Capstone\Capstone\Capstone\obj\Debug\Capstone.csproj.CopyComplete
 C:\Users\Alex\Desktop\Capstone\Capstone\Capstone\obj\Debug\Capstone.dll
 C:\Users\Alex\Desktop\Capstone\Capstone\Capstone\obj\Debug\Capstone.pdb
+C:\Users\Aiko\Desktop\Capstone\Capstone\Capstone\bin\ClosedXML.dll
+C:\Users\Aiko\Desktop\Capstone\Capstone\Capstone\bin\DocumentFormat.OpenXml.dll
+C:\Users\Aiko\Desktop\Capstone\Capstone\Capstone\bin\ExcelNumberFormat.dll
+C:\Users\Aiko\Desktop\Capstone\Capstone\Capstone\bin\FastMember.Signed.dll
+C:\Users\Aiko\Desktop\Capstone\Capstone\Capstone\bin\System.IO.Packaging.dll
+C:\Users\Aiko\Desktop\Capstone\Capstone\Capstone\bin\ClosedXML.pdb
+C:\Users\Aiko\Desktop\Capstone\Capstone\Capstone\bin\ClosedXML.xml
+C:\Users\Aiko\Desktop\Capstone\Capstone\Capstone\bin\DocumentFormat.OpenXml.xml
+C:\Users\Aiko\Desktop\Capstone\Capstone\Capstone\bin\ExcelNumberFormat.xml

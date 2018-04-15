@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using Capstone.Classes.GeneratorClasses;
 using Capstone.Classes;
+using ClosedXML.Excel;
 
 namespace Capstone.Controllers
 {
@@ -92,7 +93,8 @@ namespace Capstone.Controllers
             conn.Close();
             try
             {
-                DataSet examSchedule = GenerateExamSchedule(sheetData);
+                List<Exam> examSchedule = GenerateExamSchedule(sheetData);
+                SaveExamSheet(examSchedule);
             } catch(Exception e)
             {
                 TempData["ERROR"] = "The provided file was incompatible. It may be missing required value columns. Please refer to the template sheet for comparison!";
@@ -103,7 +105,7 @@ namespace Capstone.Controllers
             System.IO.File.Delete(path);
         }
 
-        public DataSet GenerateExamSchedule(DataSet classData)
+        public List<Exam> GenerateExamSchedule(DataSet classData)
         {
             // Data Ref Points
             // Indexing ensures that any sheet will function appropriately even if the headers aren't exact, so long as
@@ -279,9 +281,17 @@ namespace Capstone.Controllers
             }
             Debug.WriteLine(JsonConvert.SerializeObject(exams, Formatting.Indented));
             //Debug.WriteLine(JsonConvert.SerializeObject(classes, Formatting.Indented));
-            return null;
+            return exams;
         }
+        public void SaveExamSheet(List<Exam> exams, string fileName)
+        {
+            XLWorkbook doc = new XLWorkbook();
+            IXLWorksheet sheet = doc.Worksheets.Add("Exam Schedule");
 
+            sheet.Cell("A1").Value = "Hello World!";
+
+            doc.SaveAs(Server.MapPath("~/App_Data/sheetStorage/" + fileName));
+        }
         public bool DownloadFileFromPath(string path)
         {
             FileInfo downloadFile = new FileInfo(path);
