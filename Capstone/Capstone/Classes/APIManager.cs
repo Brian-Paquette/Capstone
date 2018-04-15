@@ -26,6 +26,12 @@ namespace Capstone.Classes
 {
     public class APIManager
     {
+        private string user;
+        public APIManager(string user)
+        {
+            this.user = user;
+        }
+
         public async Task<string> GetAccessToken(HttpContextBase httpContextBase)
         {
             string token = null;
@@ -80,9 +86,13 @@ namespace Capstone.Classes
             // Writeable stream from byte array for drive upload
             Stream stream = new MemoryStream(data);
 
-            string dir = "/PROGRAM SCHEDULES/";
+            DBManager db = new DBManager();
+
+            string dir = "";
             if (examSheet)
-                dir = "/EXAM SCHEDULES/";
+                dir = db.GetUserExamDirectory(user);
+            else
+                dir = db.GetUserUploadDirectory(user);
 
             Microsoft.Graph.DriveItem file = client.Me.Drive.Root.ItemWithPath(dir + saveName).Content.Request().PutAsync<DriveItem>(stream).Result;
             return file.WebUrl;
@@ -108,8 +118,16 @@ namespace Capstone.Classes
                         return Task.FromResult(0);
                     }));
 
+            DBManager db = new DBManager();
+            string dir = db.GetUserUploadDirectory(user);
+
             //Get all items in drive
-            IDriveItemChildrenCollectionPage items = await client.Me.Drive.Root.ItemWithPath("/PROGRAM SCHEDULES/").Children.Request().GetAsync();
+            IDriveItemChildrenCollectionPage items = null;
+            try
+            {
+                items = await client.Me.Drive.Root.ItemWithPath(dir).Children.Request().GetAsync();
+            }
+            catch(Exception e) { }
             return items;
         }
         

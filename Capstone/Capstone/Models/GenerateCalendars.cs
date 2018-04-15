@@ -8,9 +8,9 @@ namespace Capstone.Models
     public class GenerateCalendars
     {
         string user;
-        bool flag;
+        string flag;
 
         public string User { get => user; set => user = value; }
-        public bool Flag { get => flag; set => flag = value; }
+        public string Flag { get => flag; set => flag = value; }
     }
 }

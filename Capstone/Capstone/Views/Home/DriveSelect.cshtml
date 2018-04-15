@@ -7,6 +7,7 @@
     <div class="tool-panel panel box-shadow">
         <div class="panel-body">
             <h3 class="faded">OneDrive</h3>
+            <span class="faded">@ViewBag.Dir</span>
             <div style="overflow-y: scroll; max-height:500px;">
                 <table class="table-condensed table-striped full-width scro">
                     <tr>
@@ -15,7 +16,9 @@
                         <th></th>
                     </tr>
                     <!-- We can restrict files by preference directory later with item.ParentReference.Path -->
-                    @foreach (Microsoft.Graph.DriveItem item in ViewBag.DriveList)
+                    @if(ViewBag.DriveList != null)
+                    {
+                    foreach (Microsoft.Graph.DriveItem item in ViewBag.DriveList)
                     {
                         if (item.File == null) { continue; }
                         <tr>
@@ -35,6 +38,7 @@
                                 }
                             </td>
                         </tr>
+                    }
                     }
                 </table>
             </div>

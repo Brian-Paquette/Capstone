@@ -41,7 +41,7 @@ namespace Capstone.Controllers
                         System.IO.File.Delete(path);
                     sheetFile.SaveAs(path);
 
-                    APIManager drive = new APIManager();
+                    APIManager drive = new APIManager(Session["USER"].ToString());
                     string returnURL = Task.Run(() => drive.UploadSheet(HttpContext, path, sheetFile.FileName)).Result;
 
                     ProcessSchedule(path, sheetFile.FileName, returnURL);
@@ -64,7 +64,7 @@ namespace Capstone.Controllers
             if (System.IO.File.Exists(path))
                 System.IO.File.Delete(path);
 
-            APIManager drive = new APIManager();
+            APIManager drive = new APIManager(Session["USER"].ToString());
             var task = Task.Run(() => drive.DownloadSheet(HttpContext, driveItemID, path)).Result;
 
             ProcessSchedule(path, fileName, returnURL);
@@ -98,7 +98,7 @@ namespace Capstone.Controllers
                 Object[] examSchedule = GenerateExamSchedule(sheetData);
                 SaveExamSheet(examSchedule, fileName);
 
-                APIManager drive = new APIManager();
+                APIManager drive = new APIManager(Session["USER"].ToString());
 
                 System.IO.File.Delete(path);
                 path = Server.MapPath("~/App_Data/sheetStorage/Exam_" + fileName);

@@ -60,37 +60,97 @@ namespace Capstone.Classes
             catch(Exception e){ }
             connection.Close();
         }
-        public void SavePreferences(string user, string fileDir, string examDir, bool genCal)
+        public void SavePreferences(string user, string fileDir, string examDir, string calGen)
         {
+
+            // Fix directory strings
+            if (fileDir[0].ToString() != "/")
+                fileDir = "/" + fileDir;
+            if (fileDir[fileDir.Length-1].ToString() != "/")
+                fileDir = fileDir + "/";
+
+            if (examDir[0].ToString() != "/")
+                examDir = "/" + examDir;
+            if (examDir[examDir.Length - 1].ToString() != "/")
+                examDir = examDir + "/";
+
             OleDbConnection connection = GetConnection();
             try
             {
                 connection.Open();
-                OleDbCommand command = new OleDbCommand("INSERT INTO UploadDirectory ([User], [Directory]) VALUES (@user,@dir)" +
-                    " ON DUPLICATE KEY UPDATE [Directory]=@fileDir", connection);
+
+                // ------------------------------------
+                // Upload Directory Section
+                OleDbCommand command = new OleDbCommand("SELECT * FROM  UploadDirectory WHERE [User] LIKE @user", connection);
                 command.Parameters.AddWithValue("@user", user);
-                command.Parameters.AddWithValue("@fileDir", fileDir);
+                OleDbDataReader reader = null;
+                reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    command = new OleDbCommand("UPDATE UploadDirectory SET [Directory] = @dir WHERE [User] = @user", connection);
+                    command.Parameters.AddWithValue("@dir", fileDir);
+                    command.Parameters.AddWithValue("@user", user);
 
-                command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
+                }
+                else
+                {
+                    command = new OleDbCommand("INSERT INTO UploadDirectory ([User], [Directory]) VALUES (@user,@dir)", connection);
+                    command.Parameters.AddWithValue("@user", user);
+                    command.Parameters.AddWithValue("@dir", fileDir);
 
-                command = new OleDbCommand("INSERT INTO ExamDirectory ([User], [Directory]) VALUES (@user,@dir)" +
-                    " ON DUPLICATE KEY UPDATE [Directory]=@fileDir", connection);
+                    command.ExecuteNonQuery();
+                }
+                // ------------------------------------
+                // Exam Directory Section
+                command = new OleDbCommand("SELECT * FROM  ExamDirectory WHERE [User] = @user", connection);
                 command.Parameters.AddWithValue("@user", user);
-                command.Parameters.AddWithValue("@dir", examDir);
+                reader = null;
+                reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    command = new OleDbCommand("UPDATE ExamDirectory SET [Directory] = @dir WHERE [User] LIKE @user", connection);
+                    command.Parameters.AddWithValue("@dir", examDir);
+                    command.Parameters.AddWithValue("@user", user);
 
-                command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
+                }
+                else
+                {
+                    command = new OleDbCommand("INSERT INTO ExamDirectory ([User], [Directory]) VALUES (@user,@dir)", connection);
+                    command.Parameters.AddWithValue("@user", user);
+                    command.Parameters.AddWithValue("@dir", examDir);
 
-                command = new OleDbCommand("INSERT INTO GenerateCalendars ([User], [Flag]) VALUES (@user,@bool)" +
-                    " ON DUPLICATE KEY UPDATE [Directory]=@fileDir", connection);
+                    command.ExecuteNonQuery();
+                }
+                // ------------------------------------
+                // Calendar Generation Section
+                command = new OleDbCommand("SELECT * FROM GenerateCalendars WHERE [User] = @user", connection);
                 command.Parameters.AddWithValue("@user", user);
-                command.Parameters.AddWithValue("@bool", genCal);
+                reader = null;
+                reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    command = new OleDbCommand("UPDATE GenerateCalendars SET [Flag] = @flag WHERE [User] LIKE @user", connection);
+                    command.Parameters.AddWithValue("@flag", calGen);
+                    command.Parameters.AddWithValue("@user", user);
 
-                command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
+                }
+                else
+                {
+                    command = new OleDbCommand("INSERT INTO GenerateCalendars ([User], [Flag]) VALUES (@user,@flag)", connection);
+                    command.Parameters.AddWithValue("@user", user);
+                    command.Parameters.AddWithValue("@flag", calGen);
+
+                    command.ExecuteNonQuery();
+                }
+                // ------------------------------------
             }
             catch (Exception e) { }
             connection.Close();
         }
-        public string GetUserFileDirectory(string user)
+        public string GetUserUploadDirectory(string user)
         {
             OleDbConnection connection = GetConnection();
             connection.Open();
@@ -101,8 +161,9 @@ namespace Capstone.Classes
             reader = command.ExecuteReader();
             while (reader.Read())
             {
+                string data = reader["Directory"].ToString();
                 connection.Close();
-                return reader["Directory"].ToString();
+                return data;
             }
             return "/Course Sheets/";
         }
@@ -117,12 +178,13 @@ namespace Capstone.Classes
             reader = command.ExecuteReader();
             while (reader.Read())
             {
+                string data = reader["Directory"].ToString();
                 connection.Close();
-                return reader["Directory"].ToString();
+                return data;
             }
             return "/Exam Sheets/";
         }
-        public bool GetUserGenCalendars(string user)
+        public string GetUserGenCalendars(string user)
         {
             OleDbConnection connection = GetConnection();
             connection.Open();
@@ -133,13 +195,11 @@ namespace Capstone.Classes
             reader = command.ExecuteReader();
             while (reader.Read())
             {
+                string data = reader["Flag"].ToString();
                 connection.Close();
-                try
-                {
-                    return Convert.ToBoolean(reader["Flag"].ToString());
-                } catch (Exception e) { }
+                return data;
             }
-            return false;
+            return "False";
         }
     }
 }

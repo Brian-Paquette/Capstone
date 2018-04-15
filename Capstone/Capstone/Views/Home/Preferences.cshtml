@@ -15,18 +15,25 @@
                     <input type="submit" style="display: none;">
                 </label>
                 <label id="lblUploadDirectory">
-                    <span>File Upload One Drive Directory</span>
-                    <input type="text" class="form-control" name="uploadDirectory" value="/Exam Scheduler/Uploads" placeholder="/Exam Scheduler/Uploads">
+                    <span>Course Sheet Drive Directory</span>
+                    <input type="text" class="form-control" name="uploadDir" value="@ViewBag.uploadDir" placeholder="/Exam Scheduler/Uploads">
                 </label>
                 <br />
                 <label id="lblExamDirectory">
-                    <span>Exam Generation One Drive Directory</span>
-                    <input type="text" class="form-control" name="ExamDirectory" value="/Exam Scheduler/Exams" placeholder="/Exam Scheduler/Uploads">
+                    <span>Exam Sheet Drive Directory</span>
+                    <input type="text" class="form-control" name="examDir" value="@ViewBag.examDir" placeholder="/Exam Scheduler/Uploads">
                 </label>
                 <br>
                 <label id="lblCalendarGen">
                     <span>Generate Calendar View?</span>
-                    <input type="checkbox" class="form-control" name="calGen">
+                    @if(@ViewBag.calgen == "True")
+                    {
+                    <input type="checkbox" class="form-control" name="calGen" value="true" checked>
+                    }
+                    else
+                    {
+                    <input type="checkbox" class="form-control" name="calGen" value="true">
+                    }
                 </label>
             }
             <hr />

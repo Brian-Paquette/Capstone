@@ -57,7 +57,7 @@ namespace Capstone.Controllers
         {
             if (Request.IsAuthenticated)
             {
-                APIManager api = new APIManager();
+                APIManager api = new APIManager(Session["USER"].ToString());
                 string token = await api.GetAccessToken(HttpContext);
                 if (string.IsNullOrEmpty(token))
                 {
@@ -96,7 +96,7 @@ namespace Capstone.Controllers
         {
             if (Request.IsAuthenticated)
             {
-                APIManager api = new APIManager();
+                APIManager api = new APIManager(Session["USER"].ToString());
                 string token = await api.GetAccessToken(HttpContext);
                 if (string.IsNullOrEmpty(token))
                 {
@@ -166,7 +166,33 @@ namespace Capstone.Controllers
         {
             if (Request.IsAuthenticated)
             {
+                string user = Session["USER"].ToString();
+                DBManager db = new DBManager();
+
+                string uploadDir = db.GetUserUploadDirectory(user);
+                string examDir = db.GetUserExamDirectory(user);
+                string calGen = db.GetUserGenCalendars(user);
+
+                ViewBag.uploadDir = uploadDir;
+                ViewBag.examDir = examDir;
+                ViewBag.calGen = calGen;
+
                 return View();
+            }
+            else { return RedirectToAction("SignOut", "Home", null); }
+        }
+        [HttpPost]
+        public ActionResult SavePreferences(string uploadDir, string examDir, bool calGen = false)
+        {
+            if (Request.IsAuthenticated)
+            {
+                string user = Session["USER"].ToString();
+                DBManager db = new DBManager();
+
+                Debug.WriteLine(calGen);
+                
+                db.SavePreferences(user, uploadDir, examDir, calGen.ToString());
+                return Redirect("/");
             }
             else { return RedirectToAction("SignOut", "Home", null); }
         }
@@ -184,12 +210,13 @@ namespace Capstone.Controllers
         {
             if (Request.IsAuthenticated)
             {
-                APIManager drive = new APIManager();
+                APIManager drive = new APIManager(Session["USER"].ToString());
                 IDriveItemChildrenCollectionPage driveItems = Task.Run(() => drive.GetDriveItems(HttpContext)).Result;
 
-                Debug.WriteLine(JsonConvert.SerializeObject(driveItems, Formatting.Indented));
+                DBManager db = new DBManager();
+                string dir = db.GetUserUploadDirectory(Session["USER"].ToString());
 
-
+                ViewBag.Dir = dir;
                 ViewBag.DriveList = driveItems;
                 return View();
             }
