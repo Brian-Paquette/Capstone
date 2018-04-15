@@ -466,8 +466,7 @@
     <Content Include="Views\Home\DriveSelect.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Data\" />
-    <Folder Include="Content\sheetStorage\" />
+    <Folder Include="App_Data\sheetStorage\" />
     <Folder Include="System\IdentityModel\Tokens\" />
   </ItemGroup>
   <ItemGroup>

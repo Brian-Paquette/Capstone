@@ -107,14 +107,12 @@ namespace Capstone.Classes
             IDriveItemChildrenCollectionPage items = await client.Me.Drive.Root.Children.Request().GetAsync();
             return items;
         }
-
-
-        // call this to download the file
-        public async Task DownloadSheet(HttpContextBase httpContextBase)
+        
+        public async Task<bool> DownloadSheet(HttpContextBase httpContextBase, string driveItemID, string path)
         {
             string token = await GetAccessToken(httpContextBase);
             if (string.IsNullOrEmpty(token))
-                return;
+                return false;
 
             GraphServiceClient client = new GraphServiceClient(
              new DelegateAuthenticationProvider(
@@ -125,35 +123,18 @@ namespace Capstone.Classes
 
                  return Task.FromResult(0);
              }));
-            var DriveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
-            //Get specific item based on itemID using items[itemid], use .content to get stream (byte data)
-            Stream stream = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Content.Request().GetAsync();
-            //path where you want to download
-            string path = @"C:/Users/b_paquette/Desktop/test.xlsx";
-            if (!System.IO.File.Exists(path))
-            {
-                // create filestream for writing data
-                FileStream fs = System.IO.File.Create(path, (int)stream.Length);
-                byte[] bytesInStream = new byte[stream.Length];
-                stream.Read(bytesInStream, 0, bytesInStream.Length);
-                fs.Write(bytesInStream, 0, bytesInStream.Length);
-                fs.Close();
-                fs.Dispose();
-                stream.Close();
-                stream.Dispose();
-            }
-            else
-            {
-                System.IO.File.Delete(path);
-                FileStream fs = System.IO.File.Create(path, (int)stream.Length);
-                byte[] bytesInStream = new byte[stream.Length];
-                stream.Read(bytesInStream, 0, bytesInStream.Length);
-                fs.Write(bytesInStream, 0, bytesInStream.Length);
-                fs.Close();
-                fs.Dispose();
-                stream.Close();
-                stream.Dispose();
-            }
+
+            Stream stream = await client.Me.Drive.Items[driveItemID].Content.Request().GetAsync();
+
+            FileStream fs = System.IO.File.Create(path, (int)stream.Length);
+            byte[] bytesInStream = new byte[stream.Length];
+            stream.Read(bytesInStream, 0, bytesInStream.Length);
+            fs.Write(bytesInStream, 0, bytesInStream.Length);
+            fs.Close();
+            fs.Dispose();
+            stream.Close();
+            stream.Dispose();
+            return true;
         }
     }
 }

@@ -185,7 +185,6 @@ namespace Capstone.Controllers
             if (Request.IsAuthenticated)
             {
                 APIManager drive = new APIManager();
-
                 IDriveItemChildrenCollectionPage driveItems = Task.Run(() => drive.GetDriveItems(HttpContext)).Result;
 
                 Debug.WriteLine(JsonConvert.SerializeObject(driveItems, Formatting.Indented));

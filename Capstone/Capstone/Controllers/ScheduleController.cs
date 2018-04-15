@@ -50,34 +50,21 @@ namespace Capstone.Controllers
             return RedirectToAction("Index", "Home", null);
         }
         [HttpPost]
-        public ActionResult ImportExcelFromDrive(HttpPostedFileBase sheetFile)
+        public ActionResult ImportExcelFromDrive(string driveItemID, string fileName)
         {
-            if (sheetFile == null || sheetFile.ContentLength == 0)
-            {
-                TempData["UploadError"] = "You must upload a file.";
-            }
-            if (sheetFile.FileName.EndsWith(".xls") || sheetFile.FileName.EndsWith(".xlsx"))
-            {
-                TempData["UploadSuccess"] = "Upload successful!";
-                // Do processing
-                try
-                {
-                    ProcessSchedule(sheetFile);
-                } catch(Exception e)
-                {
-                    TempData["UploadError"] = "Please upload a valid file.";
-                }
-            }
-            else
-            {
-                TempData["UploadError"] = "Please upload a valid file.";
-            }
-            return RedirectToAction("Index", "Home", null);
+            string path = Server.MapPath("~/App_Data/sheetStorage/" + fileName);
+            if (System.IO.File.Exists(path))
+                System.IO.File.Delete(path);
+
+            APIManager drive = new APIManager();
+            var task = Task.Run(() => drive.DownloadSheet(HttpContext, driveItemID, path)).Result;
+
+            return RedirectToAction("DriveSelect", "Home", null);
         }
 
         public void ProcessSchedule(HttpPostedFileBase sheetFile)
         {
-            string path = Server.MapPath("~/Content/sheetStorage/" + sheetFile.FileName);
+            string path = Server.MapPath("~/App_Data/sheetStorage/" + sheetFile.FileName);
             if (System.IO.File.Exists(path))
                 System.IO.File.Delete(path);
             sheetFile.SaveAs(path);

@@ -14,7 +14,7 @@
                         <th>Last Modified</th>
                         <th></th>
                     </tr>
-                    <!--LOOP FOR ALL RECORDS-->
+                    <!-- We can restrict files by preference directory later with item.ParentReference.Path -->
                     @foreach (Microsoft.Graph.DriveItem item in ViewBag.DriveList)
                     {
                         if (item.File == null) { continue; }
@@ -22,15 +22,19 @@
                             <td><span class="glyphicon glyphicon-file faded" aria-hidden="true"></span> @item.Name</td>
                             <td class="faded">@Convert.ToDateTime(item.LastModifiedDateTime.ToString()).ToString("MM/dd/yyyy hh:mm tt")</td>
                             <td>
-                                <label class="btn btn-info pull-right" style="border:none;">
-                                    <span>Generate Exam Schedule</span>
-                                    <span class="glyphicon glyphicon-download" aria-hidden="true"></span>
-                                    <input type="button" style="display: none;" onclick="location.href='@Url.Action("ImportExcelFromFile", "Schedule", new { id = item.Id })'">
-                                </label>
+                                @using (Html.BeginForm("ImportExcelFromDrive", "Schedule", FormMethod.Post, new { id = "sheetSelectFromFile", enctype = "multipart/form-data" }))
+                                {
+                                    <input type="hidden" name="fileName" value="@item.Name"/>
+                                    <input type="hidden" name="driveItemID" value="@item.Id" />
+                                    <label class="btn btn-info pull-right" style="border:none;">
+                                        <span>Generate Exam Schedule</span>
+                                        <span class="glyphicon glyphicon-download" aria-hidden="true"></span>
+                                        <input type="submit" style="display: none;">
+                                    </label>
+                                }
                             </td>
                         </tr>
                     }
-                    <!---->
                 </table>
             </div>
             <hr />
