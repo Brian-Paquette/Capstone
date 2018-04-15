@@ -185,12 +185,11 @@ namespace Capstone.Controllers
             if (Request.IsAuthenticated)
             {
                 APIManager drive = new APIManager();
-                
-                var driveItems = Task.Run(async () => { await drive.GetDriveItems(HttpContext);});
-                driveItems.Wait();
+
+                IDriveItemChildrenCollectionPage driveItems = Task.Run(() => drive.GetDriveItems(HttpContext)).Result;
 
                 Debug.WriteLine(JsonConvert.SerializeObject(driveItems, Formatting.Indented));
-
+                ViewBag.DriveList = driveItems;
                 return View();
             }
             else { return RedirectToAction("SignOut", "Home", null); }

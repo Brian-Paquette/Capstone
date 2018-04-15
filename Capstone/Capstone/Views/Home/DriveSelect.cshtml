@@ -10,14 +10,26 @@
             <div style="overflow-y: scroll; max-height:500px;">
                 <table class="table-condensed table-striped full-width scro">
                     <tr>
-                        <th>Source File</th>
-                        <th>Exam Generated</th>
-                        <th>Date Generated</th>
-                        <th>Calendar Link</th>
-                        <th>User</th>
+                        <th>Name</th>
+                        <th>Last Modified</th>
+                        <th></th>
                     </tr>
                     <!--LOOP FOR ALL RECORDS-->
-
+                    @foreach (Microsoft.Graph.DriveItem item in ViewBag.DriveList)
+                    {
+                        if (item.File == null) { continue; }
+                        <tr>
+                            <td><span class="glyphicon glyphicon-file faded" aria-hidden="true"></span> @item.Name</td>
+                            <td class="faded">@Convert.ToDateTime(item.LastModifiedDateTime.ToString()).ToString("MM/dd/yyyy hh:mm tt")</td>
+                            <td>
+                                <label class="btn btn-info pull-right" style="border:none;">
+                                    <span>Generate Exam Schedule</span>
+                                    <span class="glyphicon glyphicon-download" aria-hidden="true"></span>
+                                    <input type="button" style="display: none;" onclick="location.href='@Url.Action("ImportExcelFromFile", "Schedule", new { id = item.Id })'">
+                                </label>
+                            </td>
+                        </tr>
+                    }
                     <!---->
                 </table>
             </div>
