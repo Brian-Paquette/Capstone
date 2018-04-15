@@ -80,7 +80,7 @@ namespace Capstone.Classes
             // Writeable stream from byte array for drive upload
             Stream stream = new MemoryStream(data);
 
-            string dir = "PROGRAM SCHEDULES";
+            string dir = "/PROGRAM SCHEDULES/";
             if (examSheet)
                 dir = "/EXAM SCHEDULES/";
 

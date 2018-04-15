@@ -91,14 +91,19 @@ namespace Capstone.Controllers
             DataSet sheetData = new DataSet();
             sheetAdapter.Fill(sheetData);
             conn.Close();
+
+            string examURL = "";
             try
             {
                 List<Exam> examSchedule = GenerateExamSchedule(sheetData);
                 SaveExamSheet(examSchedule, null, fileName);
 
                 APIManager drive = new APIManager();
+
+                System.IO.File.Delete(path);
                 path = Server.MapPath("~/App_Data/sheetStorage/Exam_" + fileName);
-                string examURL = Task.Run(() => drive.UploadSheet(HttpContext, path, "Exam_" + fileName, true)).Result;
+
+                examURL = Task.Run(() => drive.UploadSheet(HttpContext, path, "Exam_" + fileName, true)).Result;
                 System.IO.File.Delete(path);
 
             } catch(Exception e)
@@ -107,8 +112,7 @@ namespace Capstone.Controllers
             }
 
             DBManager db = new DBManager();
-            db.NewHistoryEntry(fileName, fileURL, "Exam_"+ fileName, "examURL", "TODO", Session["USER"].ToString());
-            System.IO.File.Delete(path);
+            db.NewHistoryEntry(fileName, fileURL, "Exam_"+ fileName, examURL, "TODO", Session["USER"].ToString());
         }
 
         public List<Exam> GenerateExamSchedule(DataSet classData)
