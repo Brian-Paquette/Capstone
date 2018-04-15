@@ -72,21 +72,6 @@ namespace Capstone.Controllers
                             requestMessage.Headers.Authorization =
                                 new AuthenticationHeaderValue("Bearer", token);
 
-<<<<<<< HEAD
-            try
-            {
-                var mailResults = await client.Me.MailFolders.Inbox.Messages.Request()
-                                    .OrderBy("receivedDateTime DESC")
-                                    .Select("subject,receivedDateTime,from")
-                                    .Top(10)
-                                    .GetAsync();
-                
-                return View(mailResults.CurrentPage);
-            }
-            catch (ServiceException ex)
-            {
-                return RedirectToAction("Error", "Home", new { message = "ERROR retrieving messages", debug = ex.Message });
-=======
                             return Task.FromResult(0);
                         }));
                 try
@@ -103,41 +88,8 @@ namespace Capstone.Controllers
                 {
                     return RedirectToAction("Error", "Home", new { message = "ERROR retrieving messages", debug = ex.Message });
                 }
->>>>>>> application-phase-2
             }
             else { return RedirectToAction("SignOut", "Home", null); }
-        }
-
-        public async Task<ActionResult> OneDriveUpload()
-        {
-            string token = await GetAccessToken();
-            if (string.IsNullOrEmpty(token))
-            {
-                // If there's no token in the session, redirect to Home
-                return Redirect("/");
-            }
-
-            GraphServiceClient client = new GraphServiceClient(
-                new DelegateAuthenticationProvider(
-                    (requestMessage) =>
-                    {
-                        requestMessage.Headers.Authorization =
-                            new AuthenticationHeaderValue("Bearer", token);
-
-                        return Task.FromResult(0);
-                    }));
-
-            try
-            {
-                var driveItem = await client.Me.Drive.Root.Children.Request().GetAsync();
-                var driveItem2 = await client.Me.Drive.Items["55BBAC51A4E4017D!104"].Request().GetAsync();
-
-                return View(driveItem2);
-            }
-            catch (ServiceException ex)
-            {
-                return RedirectToAction("Error", "Home", new { message = "ERROR retrieving messages", debug = ex.Message });
-            }
         }
 
         public async Task<ActionResult> Calendar()
@@ -177,26 +129,7 @@ namespace Capstone.Controllers
                     return RedirectToAction("Error", "Home", new { message = "ERROR retrieving events", debug = ex.Message });
                 }
             }
-<<<<<<< HEAD
-        }
-
-
-
-        public ActionResult About()
-        {
-            ViewBag.Message = "Your application description page.";
-
-            return View();
-        }
-
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "";
-
-            return View();
-=======
             else { return RedirectToAction("SignOut", "Home", null); }
->>>>>>> application-phase-2
         }
         
         public void SignIn()

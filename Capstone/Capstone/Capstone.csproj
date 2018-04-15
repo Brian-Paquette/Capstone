@@ -423,11 +423,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_GlobalResources\Resource.designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resource.resx</DependentUpon>
-    </Compile>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -487,15 +482,11 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Claims\Index.cshtml" />
-    <Content Include="Views\Home\Calendar.cshtml" />
-<<<<<<< HEAD
-    <Content Include="Views\Home\OneDriveUpload.cshtml" />
     <Content Include="Views\Home\Inbox.cshtml" />
-=======
+    <Content Include="Views\Home\Calendar.cshtml" />
     <Content Include="Views\Home\Preferences.cshtml" />
     <Content Include="Views\Home\History.cshtml" />
     <Content Include="Views\Home\DriveSelect.cshtml" />
->>>>>>> application-phase-2
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\sheetStorage\" />
@@ -513,12 +504,6 @@
   <ItemGroup>
     <None Include="packages.config" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="App_GlobalResources\Resource.resx">
-      <Generator>GlobalResourceProxyGenerator</Generator>
-      <LastGenOutput>Resource.designer.cs</LastGenOutput>
-    </Content>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

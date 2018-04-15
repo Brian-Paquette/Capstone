@@ -12,10 +12,10 @@
             Subject
         </th>
         <th>
-            Body
+            Received
         </th>
         <th>
-            End
+            From
         </th>
     </tr>
 
@@ -26,10 +26,10 @@
                 @Html.DisplayFor(modelItem => item.Subject)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Body)
+                @Html.DisplayFor(modelItem => item.ReceivedDateTime)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.From)
+                @Html.DisplayFor(modelItem => item.From.EmailAddress.Name) &lt;@Html.DisplayFor(modelItem => item.From.EmailAddress.Address)&gt;
             </td>
         </tr>
     }
