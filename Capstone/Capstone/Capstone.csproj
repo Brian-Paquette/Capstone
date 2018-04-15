@@ -436,7 +436,10 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\ExamDirectory.cs" />
+    <Compile Include="Models\GenerateCalendars.cs" />
     <Compile Include="Models\History.cs" />
+    <Compile Include="Models\UploadDirectory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="TokenStorage\SessionTokenCache.cs" />
