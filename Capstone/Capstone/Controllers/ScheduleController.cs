@@ -36,7 +36,7 @@ namespace Capstone.Controllers
                 TempData["UploadSuccess"] = "Upload successful!";
                 try
                 {
-                    string path = Server.MapPath("|DataDirectory|/sheetStorage/" + sheetFile.FileName);
+                    string path = AppDomain.CurrentDomain.GetData("DataDirectory").ToString() + "/sheetStorage/" + sheetFile.FileName;
                     if (System.IO.File.Exists(path))
                         System.IO.File.Delete(path);
                     sheetFile.SaveAs(path);
@@ -60,7 +60,7 @@ namespace Capstone.Controllers
         [HttpPost]
         public ActionResult ImportExcelFromDrive(string driveItemID, string fileName, string returnURL)
         {
-            string path = Server.MapPath("|DataDirectory|/sheetStorage/" + fileName);
+            string path = AppDomain.CurrentDomain.GetData("DataDirectory").ToString() + "/sheetStorage/" + fileName;
             if (System.IO.File.Exists(path))
                 System.IO.File.Delete(path);
 
@@ -101,7 +101,7 @@ namespace Capstone.Controllers
                 APIManager drive = new APIManager(Session["USER"].ToString());
 
                 System.IO.File.Delete(path);
-                path = Server.MapPath("|DataDirectory|/sheetStorage/Exam_" + fileName);
+                path = AppDomain.CurrentDomain.GetData("DataDirectory").ToString() + "/sheetStorage/Exam_" + fileName;
 
                 examURL = Task.Run(() => drive.UploadSheet(HttpContext, path, "Exam_" + fileName, true)).Result;
                 System.IO.File.Delete(path);
@@ -430,7 +430,7 @@ namespace Capstone.Controllers
                 sheet.Cell("I" + row).Value = datarow.Duration;
             }
 
-            doc.SaveAs(Server.MapPath("|DataDirectory|/sheetStorage/Exam_" + fileName));
+            doc.SaveAs(AppDomain.CurrentDomain.GetData("DataDirectory").ToString() + "/sheetStorage/Exam_" + fileName);
         }
         public bool DownloadFileFromPath(string path)
         {
