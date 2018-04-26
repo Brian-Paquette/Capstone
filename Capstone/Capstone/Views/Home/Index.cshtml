@@ -43,18 +43,18 @@
                     <div class="clearfix"></div>
                     <hr />
                     @using (Html.BeginForm("ImportExcelFromFile", "Schedule", FormMethod.Post, new { id = "sheetSelectFromFile", enctype = "multipart/form-data" }))
-                    {
-                        <label id="schedule-upload-fromFile" class="full-width btn btn-default buffer-bottom">
-                            <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
-                            <span class="btn-label pull-left">Select Course Schedule From File (.xsls, .xsl)</span>
-                            <input type="file" name="sheetFile" style="display: none;" accept=".xlsx,.xls">
-                        </label>
-                        <label id="schedule-generate" class="full-width btn btn-info buffer-bottom" style="display:none;">
-                            <span class="glyphicon glyphicon-download" aria-hidden="true"></span>
-                            <span class="btn-label pull-left">Generate Exam Schedule</span>
-                            <input type="submit" style="display: none;">
-                        </label>
-                    }
+    {
+                <label id="schedule-upload-fromFile" class="full-width btn btn-default buffer-bottom">
+                    <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
+                    <span class="btn-label pull-left">Select Course Schedule From File (.xsls, .xsl)</span>
+                    <input type="file" name="sheetFile" style="display: none;" accept=".xlsx,.xls">
+                </label>
+                <label id="schedule-generate" class="full-width btn btn-info buffer-bottom" style="display:none;">
+                    <span class="glyphicon glyphicon-download" aria-hidden="true"></span>
+                    <span class="btn-label pull-left">Generate Exam Schedule</span>
+                    <input type="submit" style="display: none;">
+                </label>
+}
                     <label class="full-width btn btn-default buffer-bottom">
                         <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
                         <span class="btn-label pull-left">Select Course Schedule From Drive</span>
@@ -63,7 +63,12 @@
                     <label id="btnHistory" class="full-width btn btn-default buffer-bottom">
                         <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
                         <span class="btn-label pull-left">Generation History</span>
-                        <input type="button" style="display: none;"  onclick="location.href='@Url.Action("History", "Home")'">
+                        <input type="button" style="display: none;" onclick="location.href='@Url.Action("History", "Home")'">
+                    </label>
+                    <label id="btnHistory" class="full-width btn btn-default buffer-bottom">
+                        <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                        <span class="btn-label pull-left">Calendar</span>
+                        <input type="button" style="display: none;" onclick="location.href='@Url.Action("Calendar", "Home")'">
                     </label>
                 </div>
             </div>

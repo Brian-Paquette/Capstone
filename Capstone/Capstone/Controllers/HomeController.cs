@@ -122,6 +122,15 @@ namespace Capstone.Controllers
                                         .Top(10)
                                         .GetAsync();
 
+
+                    
+                    DateTime date1 = new DateTime(2018, 4, 26, 13, 30, 0);
+                    Event eventname = new Event();
+                    eventname.Start.DateTime = "2018-26-04T13:00:00.0000000";
+
+
+                    await client.Me.Calendar.Events.Request().AddAsync(eventname);
+
                     return View(eventResults.CurrentPage);
                 }
                 catch (ServiceException ex)

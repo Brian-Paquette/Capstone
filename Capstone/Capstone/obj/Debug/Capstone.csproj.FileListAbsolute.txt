@@ -1429,3 +1429,13 @@ C:\Users\Aiko\Desktop\Capstone\Capstone\Capstone\bin\ClosedXML.pdb
 C:\Users\Aiko\Desktop\Capstone\Capstone\Capstone\bin\ClosedXML.xml
 C:\Users\Aiko\Desktop\Capstone\Capstone\Capstone\bin\DocumentFormat.OpenXml.xml
 C:\Users\Aiko\Desktop\Capstone\Capstone\Capstone\bin\ExcelNumberFormat.xml
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\ClosedXML.dll
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\DocumentFormat.OpenXml.dll
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\ExcelNumberFormat.dll
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\FastMember.Signed.dll
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\System.IO.Packaging.dll
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\ClosedXML.pdb
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\ClosedXML.xml
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\DocumentFormat.OpenXml.xml
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\bin\ExcelNumberFormat.xml
+C:\Users\b_paquette\Desktop\capstone\Capstone\Capstone\Capstone\obj\Debug\Capstone.csprojResolveAssemblyReference.cache
