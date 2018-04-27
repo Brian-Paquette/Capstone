@@ -179,69 +179,95 @@ namespace Capstone.Classes
             DBManager db = new DBManager();
             if (db.GetUserGenCalendars(user).ToUpper() == "TRUE")
             {
-                foreach (Exam exam in exams)
+                try
                 {
-                    DateTime examTime = Convert.ToDateTime(exam.Start);
-                    DateTime start = new DateTime(
-                        DateTime.Now.Year, 
-                        DateTime.Now.Month, 
-                        DateTime.Now.Day, 
-                        examTime.Hour, 
-                        examTime.Minute, 
-                        examTime.Second, 
-                        examTime.Millisecond, 
-                        DateTimeKind.Utc);
-                    
-                    foreach(System.DayOfWeek weekday in Enum.GetValues(typeof(System.DayOfWeek)))
+                    Debug.WriteLine("Create Calendar ... ");
+                    Microsoft.Graph.Calendar examCalendar = new Microsoft.Graph.Calendar
                     {
-                        if(exam.Day.ToUpper() == weekday.ToString().ToUpper())
+                        Name = name,
+                        Events = new CalendarEventsCollectionPage(),
+                    };
+
+                    Debug.WriteLine("Check Calendars ... ");
+                    var calendars = await client.Me.Calendars.Request().GetAsync();
+                    bool exists = false;
+                    foreach (Microsoft.Graph.Calendar calendar in calendars)
+                    {
+                        if (calendar.Name == name)
                         {
-                            start = start.AddDays((weekday + 1) - (DateTime.Now.DayOfWeek + 1));
-                            break;
+                            Debug.WriteLine("Delete Calendar ... ");
+                            exists = true;
+                            await client.Me.Calendars[calendar.Id].Request().DeleteAsync();
                         }
                     }
-                    TimeSpan span = Convert.ToDateTime(exam.End).Subtract(Convert.ToDateTime(exam.Start));
-                    DateTime end = start.AddHours(span.Hours);
-                    try
+                    if (!exists)
                     {
-                        Event entry = new Event();
-                        entry.Start = new DateTimeTimeZone
+                        Debug.WriteLine("Add Calendar ... ");
+                        await client.Me.Calendars.Request().AddAsync(examCalendar);
+                    }
+                    foreach (Exam exam in exams)
+                    {
+                        DateTime examTime = Convert.ToDateTime(exam.Start);
+                        DateTime start = new DateTime(
+                            DateTime.Now.Year,
+                            DateTime.Now.Month,
+                            DateTime.Now.Day,
+                            examTime.Hour,
+                            examTime.Minute,
+                            examTime.Second,
+                            examTime.Millisecond,
+                            DateTimeKind.Utc);
+
+                        foreach (System.DayOfWeek weekday in Enum.GetValues(typeof(System.DayOfWeek)))
                         {
-                            DateTime = string.Format("{0:s}", start)
-                        };
-                        entry.End = new DateTimeTimeZone
-                        {
-                            DateTime = string.Format("{0:s}", end)
-                        };
-                        entry.Body = new ItemBody
-                        {
-                            Content = exam.Room + "\n Faculty: " + exam.Faculty + "\n Proctor: " + exam.Proctor
-                        };
-                        entry.Subject = exam.Code + ": " + exam.Name + ", Section " + exam.Section;
-                        entry.SingleValueExtendedProperties = new EventSingleValueExtendedPropertiesCollectionPage
-                        {
-                            new SingleValueLegacyExtendedProperty
+                            if (exam.Day.ToUpper() == weekday.ToString().ToUpper())
                             {
-                                Id = "String " + Guid.NewGuid().ToString() + " Name TruckleSoft1",
-                                Value = "CLM_MidweekMeeting"
+                                start = start.AddDays((weekday + 1) - (DateTime.Now.DayOfWeek + 1));
+                                break;
+                            }
+                        }
+                        TimeSpan span = Convert.ToDateTime(exam.End).Subtract(Convert.ToDateTime(exam.Start));
+                        DateTime end = start.AddHours(span.Hours);
+                        Event entry = new Event
+                        {
+                            Calendar = examCalendar,
+                            Start = new DateTimeTimeZone
+                            {
+                                DateTime = string.Format("{0:s}", start),
+                                TimeZone = TimeZone.CurrentTimeZone.StandardName
+                            },
+                            End = new DateTimeTimeZone
+                            {
+                                DateTime = string.Format("{0:s}", end),
+                                TimeZone = TimeZone.CurrentTimeZone.StandardName
+                            },
+                            Body = new ItemBody
+                            {
+                                Content = exam.Room + "\n Faculty: " + exam.Faculty + "\n Proctor: " + exam.Proctor
+                            },
+                            Subject = exam.Code + ": " + exam.Name + ", Section " + exam.Section,
+                            SingleValueExtendedProperties = new EventSingleValueExtendedPropertiesCollectionPage
+                            {
+                                new SingleValueLegacyExtendedProperty
+                                {
+                                    Id = "String " + Guid.NewGuid().ToString() + " Name TruckleSoft1",
+                                    Value = "CLM_MidweekMeeting"
+                                }
                             }
                         };
-
-                        // Enjoy eating this error forever if you try and solve this
-
-                        // Exception thrown: 'Microsoft.Graph.ServiceException' in mscorlib.dll
-                        // Microsoft.Graph.ServiceException: Code: ErrorAccessDenied
-                        // Message: Access is denied.Check credentials and try again.
-                            
-                        //var calendars = await client.Me.Calendars.Request().GetAsync();
-                        //Debug.WriteLine(JsonConvert.SerializeObject(calendars));
-                        //await client.Me.Calendars[].Events.Request().AddAsync(entry);
-                        //await client.Me.Events.Request().AddAsync(entry);
+                        Debug.WriteLine("New Event ... ");
+                        //await client.Me.Calendars[examCalendar.Id].Events.Request().AddAsync(entry);
+                        await client.Me.Events.Request().AddAsync(entry);
                     }
-                    catch (Exception e)
-                    {
-                        Debug.WriteLine(e.ToString());
-                    }
+                    //Debug.WriteLine(JsonConvert.SerializeObject(calendars));
+                    //await client.Me.Calendars["Test"].Events.Request().AddAsync(entry);
+
+                    //await client.Me.Events.Request().AddAsync(entry);
+                }
+                catch(Exception e)
+                {
+                    Debug.WriteLine(e.ToString());
+                    Debug.WriteLine(e.InnerException);
                 }
             }
             return "";

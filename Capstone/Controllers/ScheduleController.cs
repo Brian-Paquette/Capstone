@@ -184,7 +184,7 @@ namespace Capstone.Controllers
             List<Exam> exams = new List<Exam>();
             List<string> classKeys = new List<string>(classes.Keys);
             List<string> roomKeys = new List<string>(rooms.Keys);
-
+            
             // This loop restricts exams from being placed in time slots that might need to accomodate larger section splits
             while (classKeys.Count > 0 && iteration <= 1)
             {
